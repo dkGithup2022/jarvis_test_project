@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @JarvisMeta(
-    fileType = FileType.INFRA_REPOSITORY_TEST,
-    references = { ChildArticleEntity.class, IChildArticleEntityRepository.class, ChildArticleEntityRepository.class }
+        fileType = FileType.INFRA_REPOSITORY_TEST,
+        references = {ChildArticleEntity.class, IChildArticleEntityRepository.class, ChildArticleEntityRepository.class}
 )
 public class IChildArticleEntityRepositoryTest {
 
@@ -30,9 +30,11 @@ public class IChildArticleEntityRepositoryTest {
 
     private ChildArticleEntity childArticleEntity;
 
+    private static Long authorId = 1L;
+
     @BeforeEach
     void setUp() {
-        childArticleEntity = ChildArticleEntity.of(ArticleType.NORMAL, "Title", "Content", new PopularityEmbeddable(10, 5, 1, 2), 1L, 1, false);
+        childArticleEntity = ChildArticleEntity.of(authorId, ArticleType.ARTICLE, "Title", "Content", new PopularityEmbeddable(10, 5, 1, 2), 1L, 1, false);
         repository.save(childArticleEntity);
     }
 
@@ -51,7 +53,7 @@ public class IChildArticleEntityRepositoryTest {
 
     @Test
     void save_shouldPersistEntity() {
-        ChildArticleEntity newEntity = ChildArticleEntity.of(ArticleType.ANNOUNCEMENT, "New Title", "New Content", new PopularityEmbeddable(0, 0, 0, 0), 1L, 2, false);
+        ChildArticleEntity newEntity = ChildArticleEntity.of(authorId, ArticleType.ANNOUNCEMENT, "New Title", "New Content", new PopularityEmbeddable(0, 0, 0, 0), 1L, 2, false);
         ChildArticleEntity savedEntity = repository.save(newEntity);
         assertNotNull(savedEntity.getId());
         assertEquals("New Title", savedEntity.getTitle());
@@ -59,7 +61,7 @@ public class IChildArticleEntityRepositoryTest {
 
     @Test
     void listByParentIdOrderByOrder_shouldReturnOrderedEntities() {
-        ChildArticleEntity secondEntity = ChildArticleEntity.of(ArticleType.DISCUSSION, "Second Title", "Second Content", new PopularityEmbeddable(0, 0, 0, 0), 1L, 2, false);
+        ChildArticleEntity secondEntity = ChildArticleEntity.of(authorId, ArticleType.DISCUSSION, "Second Title", "Second Content", new PopularityEmbeddable(0, 0, 0, 0), 1L, 2, false);
         repository.save(secondEntity);
 
         Pageable pageable = PageRequest.of(0, 10);

@@ -4,6 +4,7 @@ import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.type.UserRole;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleWriterBase;
+import com.jarvis.sample.simpleboard.domain.article.PopularityMapper;
 import com.jarvis.sample.simpleboard.domain.article.specs.Discussion;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
@@ -18,11 +19,11 @@ import java.util.Optional;
 
 @Component
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_IMPL,
-    references = {Discussion.class, DiscussionWriter.class, ArticleWriterBase.class,
-        UserEntity.class, IUserEntityRepository.class,
-        ParentArticleEntity.class, IParentArticleEntityRepository.class,
-        ArticleType.class, UserRole.class, Popularity.class}
+        fileType = FileType.DOMAIN_API_IMPL,
+        references = {Discussion.class, DiscussionWriter.class, ArticleWriterBase.class,
+                UserEntity.class, IUserEntityRepository.class,
+                ParentArticleEntity.class, IParentArticleEntityRepository.class,
+                ArticleType.class, UserRole.class, Popularity.class}
 )
 public class DefaultDiscussionWriter implements DiscussionWriter {
 
@@ -30,7 +31,7 @@ public class DefaultDiscussionWriter implements DiscussionWriter {
     private final IUserEntityRepository userEntityRepository;
 
     @Autowired
-    public DefaultDiscussionWriter(IParentArticleEntityRepository parentArticleEntityRepository, 
+    public DefaultDiscussionWriter(IParentArticleEntityRepository parentArticleEntityRepository,
                                    IUserEntityRepository userEntityRepository) {
         this.parentArticleEntityRepository = parentArticleEntityRepository;
         this.userEntityRepository = userEntityRepository;
@@ -38,59 +39,59 @@ public class DefaultDiscussionWriter implements DiscussionWriter {
 
     @Override
     public Discussion write(Discussion article) {
-        if (article.id() != null) {
+        if (article.getId() != null) {
             throw new RuntimeException("Article ID must be null for a new article");
         }
-        
-        UserEntity author = userEntityRepository.findById(article.authorId())
+
+        UserEntity author = userEntityRepository.findById(article.getAuthorId())
                 .orElseThrow(() -> new RuntimeException("Author not found"));
 
         ParentArticleEntity entity = ParentArticleEntity.of(
                 ArticleType.DISCUSSION,
-                article.title(),
-                article.content(),
+                article.getTitle(),
+                article.getContent(),
                 author.getId(),
-                new PopularityEmbeddable(article.popularity()),
+                PopularityMapper.toEmbeddable(article.getPopularity()),
                 false
         );
 
         ParentArticleEntity savedEntity = parentArticleEntityRepository.save(entity);
-        
-        return Discussion.of(savedEntity.getId(), savedEntity.getAuthorId(), 
-                             author.getNickname(), savedEntity.getTitle(), 
-                             savedEntity.getContent(), article.popularity(), false);
+
+        return Discussion.of(savedEntity.getId(), savedEntity.getAuthorId(),
+                author.getNickname(), savedEntity.getTitle(),
+                savedEntity.getContent(), article.getPopularity(), false);
     }
 
     @Override
     public Discussion update(Discussion article) {
-        ParentArticleEntity entity = parentArticleEntityRepository.findById(article.id())
+        ParentArticleEntity entity = parentArticleEntityRepository.findById(article.getId())
                 .orElseThrow(() -> new RuntimeException("Article not found"));
 
         entity = ParentArticleEntity.of(
                 entity.getId(),
                 ArticleType.DISCUSSION,
-                article.title(),
-                article.content(),
+                article.getTitle(),
+                article.getContent(),
                 entity.getAuthorId(),
                 entity.getPopularityEmbeddable(),
                 entity.getDeleted()
         );
 
         ParentArticleEntity updatedEntity = parentArticleEntityRepository.save(entity);
-        
+
         UserEntity author = userEntityRepository.findById(updatedEntity.getAuthorId())
                 .orElseThrow(() -> new RuntimeException("Author not found"));
 
-        return Discussion.of(updatedEntity.getId(), updatedEntity.getAuthorId(), 
-                             author.getNickname(), updatedEntity.getTitle(), 
-                             updatedEntity.getContent(), article.popularity(), updatedEntity.getDeleted());
+        return Discussion.of(updatedEntity.getId(), updatedEntity.getAuthorId(),
+                author.getNickname(), updatedEntity.getTitle(),
+                updatedEntity.getContent(), article.getPopularity(), updatedEntity.getDeleted());
     }
 
     @Override
     public void delete(Long id) {
         ParentArticleEntity entity = parentArticleEntityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Article not found"));
-        
+
         entity = ParentArticleEntity.of(
                 entity.getId(),
                 entity.getArticleType(),

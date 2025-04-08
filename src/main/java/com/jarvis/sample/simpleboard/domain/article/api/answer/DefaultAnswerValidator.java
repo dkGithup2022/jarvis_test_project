@@ -3,14 +3,16 @@ package com.jarvis.sample.simpleboard.domain.article.api.answer;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleValidatorBase;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
 import com.jarvis.sample.simpleboard.infra.article.api.IChildArticleEntityRepository;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.article.specs.Answer;
-import com.jarvis.sample.simpleboard.domain.user.User;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +46,7 @@ public class DefaultAnswerValidator implements AnswerValidator {
         if (answer == null || user == null) {
             return false;
         }
-        return answer.getAuthorId().equals(user.getId()) && articleAndUserExist(answer, user);
+        return answer.getAuthorId().equals(user.getUserId()) && articleAndUserExist(answer, user);
     }
 
     @Override
@@ -52,12 +54,12 @@ public class DefaultAnswerValidator implements AnswerValidator {
         if (answer == null || user == null) {
             return false;
         }
-        return answer.getAuthorId().equals(user.getId()) && articleAndUserExist(answer, user);
+        return answer.getAuthorId().equals(user.getUserId()) && articleAndUserExist(answer, user);
     }
 
     private boolean articleAndUserExist(Answer answer, User user) {
         Optional<ChildArticleEntity> articleEntity = childArticleEntityRepository.findById(answer.getId());
-        Optional<UserEntity> userEntity = userEntityRepository.findById(user.getId());
+        Optional<UserEntity> userEntity = userEntityRepository.findById(user.getUserId());
         return articleEntity.isPresent() && userEntity.isPresent();
     }
 }

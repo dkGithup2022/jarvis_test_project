@@ -1,5 +1,7 @@
 package com.jarvis.sample.simpleboard.domain.fixture.article.api.announcement;
 
+import com.jarvis.sample.simpleboard.domain.article.api.announcement.AnnouncementValidator;
+import com.jarvis.sample.simpleboard.domain.article.api.announcement.DefaultAnnouncementValidator;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 

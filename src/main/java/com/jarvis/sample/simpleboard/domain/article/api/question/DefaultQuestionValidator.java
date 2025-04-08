@@ -43,22 +43,22 @@ public class DefaultQuestionValidator implements QuestionValidator {
 
     @Override
     public boolean canUpdate(Question article, User user) {
-        Optional<UserEntity> userEntityOpt = userEntityRepository.findById(user.getId());
+        Optional<UserEntity> userEntityOpt = userEntityRepository.findById(user.getUserId());
         Optional<ParentArticleEntity> articleEntityOpt = parentArticleEntityRepository.findById(article.getId());
 
         return userEntityOpt.isPresent() &&
                 articleEntityOpt.isPresent() &&
-                articleEntityOpt.get().getAuthorId().equals(user.getId());
+                articleEntityOpt.get().getAuthorId().equals(user.getUserId());
     }
 
     @Override
     public boolean canDelete(Question article, User user) {
-        Optional<UserEntity> userEntityOpt = userEntityRepository.findById(user.getId());
+        Optional<UserEntity> userEntityOpt = userEntityRepository.findById(user.getUserId());
         Optional<ParentArticleEntity> articleEntityOpt = parentArticleEntityRepository.findById(article.getId());
 
         return userEntityOpt.isPresent() &&
                 articleEntityOpt.isPresent() &&
-                articleEntityOpt.get().getAuthorId().equals(user.getId());
+                articleEntityOpt.get().getAuthorId().equals(user.getUserId());
     }
 }
 

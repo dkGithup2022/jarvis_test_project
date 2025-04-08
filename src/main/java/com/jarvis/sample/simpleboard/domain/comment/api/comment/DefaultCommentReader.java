@@ -43,7 +43,7 @@ public class DefaultCommentReader implements CommentReader {
         List<CommentEntity> commentEntities = commentEntityRepository.listByArticleId(articleType, articleId, pageRequest);
         return commentEntities.stream()
                 .map(this::convertToDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Comment convertToDomain(CommentEntity entity) {

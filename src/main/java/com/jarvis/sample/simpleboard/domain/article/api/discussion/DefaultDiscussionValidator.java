@@ -1,12 +1,17 @@
 package com.jarvis.sample.simpleboard.domain.article.api.discussion;
 
+import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.type.UserRole;
+import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleValidatorBase;
 import com.jarvis.sample.simpleboard.domain.article.specs.Discussion;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
 import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
+import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
+import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
@@ -34,20 +39,20 @@ public class DefaultDiscussionValidator implements DiscussionValidator {
 
     @Override
     public boolean canUpdate(Discussion article, User user) {
-        if (!article.getAuthorId().equals(user.getId())) {
+        if (!article.getAuthorId().equals(user.getUserId())) {
             return false;
         }
-        Optional<UserEntity> userEntity = userEntityRepository.findById(user.getId());
+        Optional<UserEntity> userEntity = userEntityRepository.findById(user.getUserId());
         Optional<ParentArticleEntity> articleEntity = parentArticleEntityRepository.findById(article.getId());
         return userEntity.isPresent() && articleEntity.isPresent();
     }
 
     @Override
     public boolean canDelete(Discussion article, User user) {
-        if (!article.getAuthorId().equals(user.getId())) {
+        if (!article.getAuthorId().equals(user.getUserId())) {
             return false;
         }
-        Optional<UserEntity> userEntity = userEntityRepository.findById(user.getId());
+        Optional<UserEntity> userEntity = userEntityRepository.findById(user.getUserId());
         Optional<ParentArticleEntity> articleEntity = parentArticleEntityRepository.findById(article.getId());
         return userEntity.isPresent() && articleEntity.isPresent();
     }

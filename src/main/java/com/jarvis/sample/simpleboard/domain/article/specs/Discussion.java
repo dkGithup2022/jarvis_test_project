@@ -6,10 +6,12 @@ import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleBase;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
+import lombok.Getter;
 
 @JarvisMeta(
         fileType = FileType.DOMAIN_SPEC
 )
+@Getter
 public class Discussion   implements ArticleBase {
 
     private static final int MAX_CONTENT_LENGTH = 10_000;

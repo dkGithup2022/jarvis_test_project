@@ -2,6 +2,7 @@ package com.jarvis.sample.simpleboard.domain.article.api.discussionReply;
 
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
+import com.jarvis.sample.simpleboard.domain.article.ArticleWriterBase;
 import com.jarvis.sample.simpleboard.domain.article.specs.DiscussionReply;
 import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
@@ -17,17 +18,18 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_IMPL,
-    references = {
-        DiscussionReply.class,
-        DiscussionReplyWriter.class,
-        ChildArticleEntity.class,
-        IChildArticleEntityRepository.class,
-        Popularity.class,
-        PopularityEmbeddable.class,
-        IUserEntityRepository.class,
-        ArticleType.class
-    }
+        fileType = FileType.DOMAIN_API_IMPL,
+        references = {
+                DiscussionReply.class,
+                DiscussionReplyWriter.class,
+                ArticleWriterBase.class,
+                ChildArticleEntity.class,
+                IChildArticleEntityRepository.class,
+                Popularity.class,
+                PopularityEmbeddable.class,
+                IUserEntityRepository.class,
+                ArticleType.class
+        }
 )
 public class DefaultDiscussionReplyWriter implements DiscussionReplyWriter {
 
@@ -35,58 +37,112 @@ public class DefaultDiscussionReplyWriter implements DiscussionReplyWriter {
     private final IUserEntityRepository userEntityRepository;
 
     @Override
-    public DiscussionReply write(DiscussionReply reply) {
-        validateUser(reply.getAuthorId());
-        ChildArticleEntity entity = mapToEntity(reply);
-        ChildArticleEntity savedEntity = childArticleEntityRepository.save(entity);
-        return mapToDomain(savedEntity);
-    }
-
-    private void validateUser(Long authorId) {
-        if (authorId == null || userEntityRepository.findById(authorId).isEmpty()) {
-            throw new IllegalArgumentException("Invalid author ID.");
+    public DiscussionReply write(DiscussionReply article) {
+        if (article.getId() != null) {
+            throw new RuntimeException("Article ID must not be present when writing a new article");
         }
-    }
 
-    private ChildArticleEntity mapToEntity(DiscussionReply reply) {
         PopularityEmbeddable popularityEmbeddable = new PopularityEmbeddable(
-            reply.getPopularity().views(),
-            reply.getPopularity().likes(),
-            reply.getPopularity().dislikes(),
-            reply.getPopularity().comments()
+                article.getPopularity().views(),
+                article.getPopularity().likes(),
+                article.getPopularity().dislikes(),
+                article.getPopularity().comments()
         );
 
-        return ChildArticleEntity.of(
-            reply.getId(),
-            reply.getAuthorId(),
-            ArticleType.DISCUSSION_REPLY,
-            reply.getTitle(),
-            reply.getContent(),
-            popularityEmbeddable,
-            reply.getParentId(),
-            reply.getOrder(),
-            reply.isDeleted()
+        ChildArticleEntity entity = ChildArticleEntity.of(
+                article.getAuthorId(),
+                ArticleType.DISCUSSION_REPLY,
+                article.getTitle(),
+                article.getContent(),
+                popularityEmbeddable,
+                article.getParentId(),
+                article.getOrder(),
+                article.isDeleted()
         );
-    }
 
-    private DiscussionReply mapToDomain(ChildArticleEntity entity) {
-        Popularity popularity = Popularity.of(
-            entity.getPopularityEmbeddable().getViews(),
-            entity.getPopularityEmbeddable().getLikes(),
-            entity.getPopularityEmbeddable().getDislikes(),
-            entity.getPopularityEmbeddable().getComments()
-        );
+        ChildArticleEntity savedEntity = childArticleEntityRepository.save(entity);
 
         return DiscussionReply.of(
-            entity.getId(),
-            entity.getAuthorId(),
-            "", // Assuming authorNickname is fetched from another source, e.g., a user repository
-            entity.getTitle(),
-            entity.getContent(),
-            popularity,
-            entity.getParentId(),
-            entity.getOrder(),
-            entity.getDeleted()
+                savedEntity.getId(),
+                savedEntity.getAuthorId(),
+                article.getAuthorNickname(), // Assuming the nickname is coming from the article directly
+                savedEntity.getTitle(),
+                savedEntity.getContent(),
+                article.getPopularity(), // Popularity is passed directly from the article
+                savedEntity.getParentId(),
+                savedEntity.getOrder(),
+                savedEntity.getDeleted()
         );
+    }
+
+    @Override
+    public DiscussionReply update(DiscussionReply article) {
+        if (article.getId() == null) {
+            throw new RuntimeException("Article ID must be present when updating an article");
+        }
+
+        Optional<ChildArticleEntity> optionalEntity = childArticleEntityRepository.findById(article.getId());
+        if (optionalEntity.isEmpty()) {
+            throw new RuntimeException("Article does not exist");
+        }
+
+        ChildArticleEntity existingEntity = optionalEntity.get();
+        
+        PopularityEmbeddable popularityEmbeddable = new PopularityEmbeddable(
+                article.getPopularity().views(),
+                article.getPopularity().likes(),
+                article.getPopularity().dislikes(),
+                article.getPopularity().comments()
+        );
+
+        ChildArticleEntity updatedEntity = ChildArticleEntity.of(
+                existingEntity.getId(),
+                existingEntity.getAuthorId(),
+                existingEntity.getArticleType(),
+                article.getTitle(),
+                article.getContent(),
+                popularityEmbeddable,
+                article.getParentId(),
+                article.getOrder(),
+                article.isDeleted()
+        );
+
+        ChildArticleEntity savedEntity = childArticleEntityRepository.save(updatedEntity);
+
+        return DiscussionReply.of(
+                savedEntity.getId(),
+                savedEntity.getAuthorId(),
+                article.getAuthorNickname(),
+                savedEntity.getTitle(),
+                savedEntity.getContent(),
+                article.getPopularity(),
+                savedEntity.getParentId(),
+                savedEntity.getOrder(),
+                savedEntity.getDeleted()
+        );
+    }
+
+    @Override
+    public void delete(Long id) {
+        Optional<ChildArticleEntity> optionalEntity = childArticleEntityRepository.findById(id);
+        if (optionalEntity.isEmpty()) {
+            throw new RuntimeException("Article does not exist");
+        }
+
+        ChildArticleEntity existingEntity = optionalEntity.get();
+        
+        ChildArticleEntity deletedEntity = ChildArticleEntity.of(
+                existingEntity.getId(),
+                existingEntity.getAuthorId(),
+                existingEntity.getArticleType(),
+                existingEntity.getTitle(),
+                existingEntity.getContent(),
+                existingEntity.getPopularityEmbeddable(),
+                existingEntity.getParentId(),
+                existingEntity.getOrder(),
+                true
+        );
+
+        childArticleEntityRepository.save(deletedEntity);
     }
 }

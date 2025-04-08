@@ -1,5 +1,6 @@
 package com.jarvis.sample.simpleboard.fixture.article.parentArticle;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;

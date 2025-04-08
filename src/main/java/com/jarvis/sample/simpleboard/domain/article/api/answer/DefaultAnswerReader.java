@@ -6,11 +6,14 @@ import com.jarvis.sample.simpleboard.domain.article.ArticleReaderBase;
 import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
 import com.jarvis.sample.simpleboard.infra.article.api.IChildArticleEntityRepository;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.article.specs.Answer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -71,6 +74,8 @@ public class DefaultAnswerReader implements AnswerReader {
 
     public List<Answer> listByParentId(Long parentId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+
+        // TODO: 메모기록- 근절해야 할 구현체
         return childArticleEntityRepository.listByParentIdOrderByOrder(parentId, pageable).stream()
                 .filter(entity -> entity.getArticleType() == ArticleType.ANSWER)
                 .map(entity -> {

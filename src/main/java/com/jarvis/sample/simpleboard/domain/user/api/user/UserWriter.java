@@ -27,7 +27,7 @@ public interface UserWriter {
      *
      *   새로운 User 값으로 매핑하여  entity 를 다시 save  한다. 같은 id 에 대해 save
      */
-    User updateUser(User user);
+    User updateUser(String nickname, String password);
 
 
     /*

@@ -3,6 +3,7 @@ package com.jarvis.sample.simpleboard.domain.article.api.discussion;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleReaderBase;
+import com.jarvis.sample.simpleboard.domain.article.PopularityMapper;
 import com.jarvis.sample.simpleboard.domain.article.specs.Discussion;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
@@ -55,7 +56,7 @@ public class DefaultDiscussionReader implements DiscussionReader {
                 userEntity.getNickname(),
                 articleEntity.getTitle(),
                 articleEntity.getContent(),
-                articleEntity.getPopularityEmbeddable().toPopularity(),
+                PopularityMapper.toRead(articleEntity.getPopularityEmbeddable()),
                 articleEntity.getDeleted()
         );
     }

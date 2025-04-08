@@ -3,8 +3,10 @@ package com.jarvis.sample.simpleboard.domain.article.api.question;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleWriterBase;
+import com.jarvis.sample.simpleboard.domain.article.PopularityMapper;
 import com.jarvis.sample.simpleboard.domain.article.specs.Question;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
+import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
 import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
@@ -42,7 +44,7 @@ public class DefaultQuestionWriter implements QuestionWriter {
                 article.getTitle(),
                 article.getContent(),
                 article.getAuthorId(),
-                article.getPopularity(),
+                PopularityMapper.toEmbeddable(article.getPopularity()),
                 false
         );
 
@@ -68,7 +70,7 @@ public class DefaultQuestionWriter implements QuestionWriter {
                 article.getTitle(),
                 article.getContent(),
                 existingEntity.getAuthorId(),
-                article.getPopularity(),
+                PopularityMapper.toEmbeddable(article.getPopularity()),
                 existingEntity.getDeleted()
         );
 
@@ -109,8 +111,8 @@ public class DefaultQuestionWriter implements QuestionWriter {
                 entity.getContent(),
                 entity.getAuthorId(),
                 null, // Assuming the nickname is not stored in ParentArticleEntity
-                entity.getPopularityEmbeddable(),
-                entity.getDeleted()
+                PopularityMapper.toRead(entity.getPopularityEmbeddable())
+                , entity.getDeleted()
         );
     }
 }

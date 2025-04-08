@@ -23,7 +23,7 @@ public class IParentArticleEntityRepositoryTest {
     @BeforeEach
     void setUp() {
         PopularityEmbeddable popularity = new PopularityEmbeddable(100, 10, 1, 5);
-        testEntity = ParentArticleEntity.of(ArticleType.NORMAL, "Test Title", "Test Content", 1L, popularity, false);
+        testEntity = ParentArticleEntity.of(ArticleType.ARTICLE, "Test Title", "Test Content", 1L, popularity, false);
         repository.save(testEntity);
     }
 
@@ -44,7 +44,7 @@ public class IParentArticleEntityRepositoryTest {
     void save_shouldPersistEntity() {
         PopularityEmbeddable newPopularity = new PopularityEmbeddable(200, 20, 2, 10);
         ParentArticleEntity newEntity = ParentArticleEntity.of(ArticleType.ANNOUNCEMENT, "New Title", "New Content", 2L, newPopularity, false);
-        
+
         ParentArticleEntity savedEntity = repository.save(newEntity);
         Assertions.assertNotNull(savedEntity.getId());
         Assertions.assertEquals("New Title", savedEntity.getTitle());
@@ -63,7 +63,7 @@ public class IParentArticleEntityRepositoryTest {
     @Test
     void save_shouldNotPersistEntityWithNullTitle() {
         PopularityEmbeddable popularity = new PopularityEmbeddable(50, 5, 0, 2);
-        ParentArticleEntity invalidEntity = ParentArticleEntity.of(ArticleType.NEWS, null, "Content without title", 3L, popularity, false);
+        ParentArticleEntity invalidEntity = ParentArticleEntity.of(ArticleType.ARTICLE, null, "Content without title", 3L, popularity, false);
 
         Assertions.assertThrows(Exception.class, () -> repository.save(invalidEntity));
     }
@@ -71,7 +71,7 @@ public class IParentArticleEntityRepositoryTest {
     @Test
     void save_shouldNotPersistEntityWithNullContent() {
         PopularityEmbeddable popularity = new PopularityEmbeddable(50, 5, 0, 2);
-        ParentArticleEntity invalidEntity = ParentArticleEntity.of(ArticleType.NEWS, "Title without content", null, 3L, popularity, false);
+        ParentArticleEntity invalidEntity = ParentArticleEntity.of(ArticleType.ARTICLE, "Title without content", null, 3L, popularity, false);
 
         Assertions.assertThrows(Exception.class, () -> repository.save(invalidEntity));
     }

@@ -1,5 +1,7 @@
 package com.jarvis.sample.simpleboard.domain.fixture.article.api.answer;
 
+import com.jarvis.sample.simpleboard.domain.article.api.answer.AnswerValidator;
+import com.jarvis.sample.simpleboard.domain.article.api.answer.DefaultAnswerValidator;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 

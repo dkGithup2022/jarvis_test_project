@@ -3,6 +3,7 @@ package com.jarvis.sample.simpleboard.domain.article.api.article;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleWriterBase;
+import com.jarvis.sample.simpleboard.domain.article.PopularityMapper;
 import com.jarvis.sample.simpleboard.infra.article.ArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.api.IArticleEntityRepository;
 import com.jarvis.sample.simpleboard.infra.user.UserEntity;
@@ -41,10 +42,10 @@ public class DefaultArticleWriter implements ArticleWriter {
 
         ArticleEntity articleEntity = ArticleEntity.of(
                 article.getAuthorId(),
-                ArticleType.NORMAL, // Default type, could be parameterized if needed
+                ArticleType.ARTICLE, // Default type, could be parameterized if needed
                 article.getTitle(),
                 article.getContent(),
-                new PopularityEmbeddable(article.getPopularity()),
+                PopularityMapper.toEmbeddable(article.getPopularity()),
                 false // Not deleted by default
         );
 
@@ -56,7 +57,7 @@ public class DefaultArticleWriter implements ArticleWriter {
                 userEntity.getNickname(),
                 savedArticleEntity.getTitle(),
                 savedArticleEntity.getContent(),
-                new Popularity(savedArticleEntity.getPopularityEmbeddable()),
+                PopularityMapper.toRead(savedArticleEntity.getPopularityEmbeddable()),
                 savedArticleEntity.getDeleted()
         );
     }
@@ -88,7 +89,7 @@ public class DefaultArticleWriter implements ArticleWriter {
                 article.getAuthorNickname(),
                 updatedArticleEntity.getTitle(),
                 updatedArticleEntity.getContent(),
-                new Popularity(updatedArticleEntity.getPopularityEmbeddable()),
+                PopularityMapper.toRead(updatedArticleEntity.getPopularityEmbeddable()),
                 updatedArticleEntity.getDeleted()
         );
     }

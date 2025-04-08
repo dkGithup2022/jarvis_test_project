@@ -3,6 +3,7 @@ package com.jarvis.sample.simpleboard.domain.article.api.article;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleValidatorBase;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import com.jarvis.sample.simpleboard.infra.article.ArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.api.IArticleEntityRepository;
 import com.jarvis.sample.simpleboard.infra.user.UserEntity;
@@ -35,7 +36,7 @@ public class DefaultArticleValidator implements ArticleValidator {
 
     @Override
     public boolean canWrite(Article article, User user) {
-        if (user.getUserRoles() == null || user.getUserRoles().isEmpty()) {
+        if (user.getUserRole() == null || user.getUserRole().isEmpty()) {
             return false;
         }
         // If article id is specified, it cannot be used for writing
@@ -47,9 +48,9 @@ public class DefaultArticleValidator implements ArticleValidator {
 
     @Override
     public boolean canUpdate(Article article, User user) {
-        if (article.getAuthorId().equals(user.getId())) {
+        if (article.getAuthorId().equals(user.getUserId())) {
             Optional<ArticleEntity> articleEntity = articleEntityRepository.findById(article.getId());
-            Optional<UserEntity> userEntity = userEntityRepository.findById(user.getId());
+            Optional<UserEntity> userEntity = userEntityRepository.findById(user.getUserId());
             return articleEntity.isPresent() && userEntity.isPresent();
         }
         return false;
@@ -57,9 +58,9 @@ public class DefaultArticleValidator implements ArticleValidator {
 
     @Override
     public boolean canDelete(Article article, User user) {
-        if (article.getAuthorId().equals(user.getId())) {
+        if (article.getAuthorId().equals(user.getUserId())) {
             Optional<ArticleEntity> articleEntity = articleEntityRepository.findById(article.getId());
-            Optional<UserEntity> userEntity = userEntityRepository.findById(user.getId());
+            Optional<UserEntity> userEntity = userEntityRepository.findById(user.getUserId());
             return articleEntity.isPresent() && userEntity.isPresent();
         }
         return false;

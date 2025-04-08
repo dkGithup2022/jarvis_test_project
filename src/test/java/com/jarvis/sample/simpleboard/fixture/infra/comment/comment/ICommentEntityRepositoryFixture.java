@@ -1,5 +1,6 @@
 package com.jarvis.sample.simpleboard.fixture.comment.comment;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
 import com.jarvis.sample.simpleboard.infra.comment.CommentEntity;
 import com.jarvis.sample.simpleboard.infra.comment.api.ICommentEntityRepository;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;

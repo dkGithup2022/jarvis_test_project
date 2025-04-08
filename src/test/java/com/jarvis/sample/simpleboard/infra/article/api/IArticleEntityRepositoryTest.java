@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @JarvisMeta(
-    fileType = FileType.INFRA_REPOSITORY_TEST,
-    references = { ArticleEntity.class, IArticleEntityRepository.class, ArticleEntityRepository.class }
+        fileType = FileType.INFRA_REPOSITORY_TEST,
+        references = {ArticleEntity.class, IArticleEntityRepository.class, ArticleEntityRepository.class}
 )
 public class IArticleEntityRepositoryTest {
 
@@ -31,7 +31,7 @@ public class IArticleEntityRepositoryTest {
     @BeforeEach
     void setUp() {
         PopularityEmbeddable popularity = new PopularityEmbeddable(100, 10, 1, 5);
-        article = ArticleEntity.of(1L, ArticleType.NORMAL, "Test Title", "Test Content", popularity, false);
+        article = ArticleEntity.of(1L, ArticleType.ARTICLE, "Test Title", "Test Content", popularity, false);
         repository.save(article);
     }
 
@@ -52,7 +52,7 @@ public class IArticleEntityRepositoryTest {
     void save_shouldPersistNewArticleEntity() {
         PopularityEmbeddable newPopularity = new PopularityEmbeddable(200, 20, 2, 10);
         ArticleEntity newArticle = ArticleEntity.of(2L, ArticleType.ANNOUNCEMENT, "New Title", "New Content", newPopularity, false);
-        
+
         ArticleEntity savedArticle = repository.save(newArticle);
         assertNotNull(savedArticle.getId());
         assertEquals("New Title", savedArticle.getTitle());
@@ -62,7 +62,7 @@ public class IArticleEntityRepositoryTest {
     void save_shouldUpdateExistingArticleEntity() {
         article = repository.findById(article.getId()).orElseThrow();
         article = ArticleEntity.of(article.getId(), 1L, ArticleType.QUESTION, "Updated Title", article.getContent(), article.getPopularityEmbeddable(), article.getDeleted());
-        
+
         ArticleEntity updatedArticle = repository.save(article);
         assertEquals("Updated Title", updatedArticle.getTitle());
     }
@@ -78,7 +78,7 @@ public class IArticleEntityRepositoryTest {
     @Test
     void searchByKeywordWithPagination_shouldReturnArticlesInDescendingOrder() {
         PopularityEmbeddable popularity1 = new PopularityEmbeddable(100, 10, 1, 5);
-        ArticleEntity article1 = ArticleEntity.of(1L, ArticleType.NORMAL, "Keyword", "Content", popularity1, false);
+        ArticleEntity article1 = ArticleEntity.of(1L, ArticleType.ARTICLE, "Keyword", "Content", popularity1, false);
         repository.save(article1);
 
         PopularityEmbeddable popularity2 = new PopularityEmbeddable(200, 20, 2, 10);

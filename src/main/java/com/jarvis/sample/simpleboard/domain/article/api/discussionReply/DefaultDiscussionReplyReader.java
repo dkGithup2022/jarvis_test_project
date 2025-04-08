@@ -3,6 +3,7 @@ package com.jarvis.sample.simpleboard.domain.article.api.discussionReply;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleReaderBase;
+import com.jarvis.sample.simpleboard.domain.article.PopularityMapper;
 import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
 import com.jarvis.sample.simpleboard.infra.article.api.IChildArticleEntityRepository;
@@ -51,7 +52,7 @@ public class DefaultDiscussionReplyReader implements DiscussionReplyReader {
                 .map(UserEntity::getNickname)
                 .orElse("Unknown");
 
-        Popularity popularity = toPopularity(articleEntity.getPopularityEmbeddable());
+        Popularity popularity = PopularityMapper.toRead(articleEntity.getPopularityEmbeddable());
 
         return DiscussionReply.of(
                 articleEntity.getId(),
@@ -66,12 +67,4 @@ public class DefaultDiscussionReplyReader implements DiscussionReplyReader {
         );
     }
 
-    private Popularity toPopularity(PopularityEmbeddable embeddable) {
-        return Popularity.of(
-                embeddable.getViews(),
-                embeddable.getLikes(),
-                embeddable.getDislikes(),
-                embeddable.getComments()
-        );
-    }
 }

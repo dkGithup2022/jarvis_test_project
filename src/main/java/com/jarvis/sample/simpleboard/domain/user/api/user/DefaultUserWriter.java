@@ -1,5 +1,6 @@
 package com.jarvis.sample.simpleboard.domain.user.api.user;
 
+import com.jarvis.sample.simpleboard.common.type.UserRole;
 import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -22,11 +24,12 @@ public class DefaultUserWriter implements UserWriter {
     private final IUserEntityRepository userEntityRepository;
 
     @Override
-    public User createUser(User user) {
+    public User createUser(String nickname, String password ){
+        // check
         if (user.getUserId() != null) {
             throw new RuntimeException("User ID must be null for new users");
         }
-        UserEntity userEntity = UserEntity.of(null, user.getNickname(), user.getUserRole());
+        UserEntity userEntity = UserEntity.of(null, nickname, Set.of(UserRole.USER));
         UserEntity savedEntity = userEntityRepository.save(userEntity);
         return User.of(savedEntity.getId(), savedEntity.getNickname(), savedEntity.getUserRole());
     }
