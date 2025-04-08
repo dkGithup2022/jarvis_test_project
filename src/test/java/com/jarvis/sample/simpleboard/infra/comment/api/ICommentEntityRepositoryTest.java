@@ -10,7 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +31,7 @@ public class ICommentEntityRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        commentEntity =CommentEntity.of(null, ArticleType.NORMAL, 1L, "Sample Comment", null, 1, null, 0, false);
+        commentEntity = CommentEntity.of(null, ArticleType.NORMAL, 1L, "Sample Comment", null, 1, null, 0, false);
         repository.save(commentEntity);
     }
 
@@ -48,14 +50,14 @@ public class ICommentEntityRepositoryTest {
 
     @Test
     void save_shouldAssignIdWhenSavingNewEntity() {
-        CommentEntity newComment =  CommentEntity.of(null, ArticleType.ANNOUNCEMENT, 2L, "New Comment", null, 2, null, 0, false);
+        CommentEntity newComment = CommentEntity.of(null, ArticleType.ANNOUNCEMENT, 2L, "New Comment", null, 2, null, 0, false);
         CommentEntity savedEntity = repository.save(newComment);
         assertNotNull(savedEntity.getId());
     }
 
     @Test
     void save_shouldUpdateExistingEntity() {
-        FakeSetter.setField(commentEntity,"content", "Updated Content");
+        FakeSetter.setField(commentEntity, "content", "Updated Content");
         CommentEntity updatedEntity = repository.save(commentEntity);
         assertEquals("Updated Content", updatedEntity.getContent());
     }
@@ -87,5 +89,20 @@ public class ICommentEntityRepositoryTest {
     void findTopByParentIdOrderByCommentSeqDesc_shouldReturnEmptyWhenNoReplies() {
         Optional<CommentEntity> topReply = repository.findTopByParentIdOrderByCommentSeqDesc(999L);
         assertFalse(topReply.isPresent());
+    }
+
+    @Test
+    void listByArticleId_shouldReturnCommentsForArticle() {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<CommentEntity> comments = repository.listByArticleId(ArticleType.NORMAL, 1L, pageRequest);
+        assertFalse(comments.isEmpty());
+        assertEquals(commentEntity.getContent(), comments.get(0).getContent());
+    }
+
+    @Test
+    void listByArticleId_shouldReturnEmptyListForNonExistingArticle() {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<CommentEntity> comments = repository.listByArticleId(ArticleType.NORMAL, 999L, pageRequest);
+        assertTrue(comments.isEmpty());
     }
 }

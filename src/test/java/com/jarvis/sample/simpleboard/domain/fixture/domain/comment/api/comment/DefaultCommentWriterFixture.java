@@ -2,6 +2,7 @@ package com.jarvis.sample.simpleboard.domain.fixture.comment.api.comment;
 
 import com.jarvis.sample.simpleboard.domain.comment.api.comment.CommentWriter;
 import com.jarvis.sample.simpleboard.domain.comment.api.comment.DefaultCommentWriter;
+import com.jarvis.sample.simpleboard.domain.fixture.comment.repository.ICommentEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 
@@ -12,5 +13,23 @@ import com.jarvis.sample.simpleboard.domain.comment.specs.Comment;
     references = { Comment.class, DefaultCommentWriter.class, CommentWriter.class }
 )
 public class DefaultCommentWriterFixture implements CommentWriter {
-    // TODO: 필요 시 테스트용 목 동작 구현
+
+    private final CommentWriter delegate;
+
+    public DefaultCommentWriterFixture() {
+        this.delegate = new DefaultCommentWriter(new ICommentEntityRepositoryFixture());
+    }
+
+    @Override
+    public Comment write(Comment comment) {
+        return delegate.write(comment);
+    }
+
+    @Override
+    public Comment update(Comment comment) {
+        return delegate.update(comment);
+    }
 }
+
+// The DefaultCommentWriterFixture class implements the CommentWriter interface.
+// It uses an instance of DefaultCommentWriter, initialized with ICommentEntityRepositoryFixture, to delegate method calls.

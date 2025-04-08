@@ -1,7 +1,6 @@
 package com.jarvis.sample.simpleboard.fixture.infra.article.childArticle;
 
 import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
-
 import com.jarvis.sample.simpleboard.infra.article.api.IChildArticleEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
@@ -38,13 +37,14 @@ public class IChildArticleEntityRepositoryFixture implements IChildArticleEntity
         }
         long newId = idGenerator.incrementAndGet();
         ChildArticleEntity newEntity = ChildArticleEntity.of(
-            newId, 
+            newId,
+            entity.getAuthorId(),
             entity.getArticleType(),
-            entity.getTitle(), 
-            entity.getContent(), 
-            entity.getPopularityEmbeddable(), 
-            entity.getParentId(), 
-            entity.getOrder(), 
+            entity.getTitle(),
+            entity.getContent(),
+            entity.getPopularityEmbeddable(),
+            entity.getParentId(),
+            entity.getOrder(),
             entity.getDeleted()
         );
         db.put(newId, newEntity);

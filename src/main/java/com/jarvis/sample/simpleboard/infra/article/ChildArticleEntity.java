@@ -25,6 +25,8 @@ public class ChildArticleEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ArticleType articleType;
 
+    private Long authorId;
+
     private String title;
 
     private String content;
@@ -37,16 +39,17 @@ public class ChildArticleEntity extends BaseEntity {
 
     private Boolean deleted;
 
-    public static ChildArticleEntity of(ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Long parentId, Integer order, Boolean deleted) {
-        return new ChildArticleEntity(null, articleType, title, content, popularityEmbeddable, parentId, order, deleted);
+    public static ChildArticleEntity of(Long authorId, ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Long parentId, Integer order, Boolean deleted) {
+        return new ChildArticleEntity(null, authorId, articleType, title, content, popularityEmbeddable, parentId, order, deleted);
     }
 
-    public static ChildArticleEntity of(Long id, ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Long parentId, Integer order, Boolean deleted) {
-        return new ChildArticleEntity(id, articleType, title, content, popularityEmbeddable, parentId, order, deleted);
+    public static ChildArticleEntity of(Long id, Long authorId, ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Long parentId, Integer order, Boolean deleted) {
+        return new ChildArticleEntity(id, authorId, articleType, title, content, popularityEmbeddable, parentId, order, deleted);
     }
 
-    private ChildArticleEntity(Long id, ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Long parentId, Integer order, Boolean deleted) {
+    private ChildArticleEntity(Long id, Long authorId, ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Long parentId, Integer order, Boolean deleted) {
         this.id = id;
+        this.authorId = authorId;
         this.articleType = articleType;
         this.title = title;
         this.content = content;

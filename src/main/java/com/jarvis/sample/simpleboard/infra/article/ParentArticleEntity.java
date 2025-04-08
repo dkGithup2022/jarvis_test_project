@@ -29,24 +29,53 @@ public class ParentArticleEntity extends BaseEntity {
 
     private String content;
 
+    private Long authorId; // 작성자 ID 추가 ✅
+
     private PopularityEmbeddable popularityEmbeddable;
 
     private Boolean deleted;
 
-
-    public static ParentArticleEntity of(ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Boolean deleted) {
-        return new ParentArticleEntity(null, articleType, title, content, popularityEmbeddable, deleted);
+    public static ParentArticleEntity of(
+            ArticleType articleType,
+            String title,
+            String content,
+            Long authorId,
+            PopularityEmbeddable popularityEmbeddable,
+            Boolean deleted
+    ) {
+        return new ParentArticleEntity(
+                null, articleType, title, content, authorId, popularityEmbeddable, deleted
+        );
     }
 
-    public static ParentArticleEntity of(Long id, ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Boolean deleted) {
-        return new ParentArticleEntity(id, articleType, title, content, popularityEmbeddable, deleted);
+    public static ParentArticleEntity of(
+            Long id,
+            ArticleType articleType,
+            String title,
+            String content,
+            Long authorId,
+            PopularityEmbeddable popularityEmbeddable,
+            Boolean deleted
+    ) {
+        return new ParentArticleEntity(
+                id, articleType, title, content, authorId, popularityEmbeddable, deleted
+        );
     }
 
-    private ParentArticleEntity(Long id, ArticleType articleType, String title, String content, PopularityEmbeddable popularityEmbeddable, Boolean deleted) {
+    private ParentArticleEntity(
+            Long id,
+            ArticleType articleType,
+            String title,
+            String content,
+            Long authorId,
+            PopularityEmbeddable popularityEmbeddable,
+            Boolean deleted
+    ) {
         this.id = id;
         this.articleType = articleType;
         this.title = title;
         this.content = content;
+        this.authorId = authorId;
         this.popularityEmbeddable = popularityEmbeddable;
         this.deleted = deleted;
     }

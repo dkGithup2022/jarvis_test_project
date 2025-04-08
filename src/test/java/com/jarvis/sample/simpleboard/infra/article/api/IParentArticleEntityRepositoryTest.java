@@ -23,7 +23,7 @@ public class IParentArticleEntityRepositoryTest {
     @BeforeEach
     void setUp() {
         PopularityEmbeddable popularity = new PopularityEmbeddable(100, 10, 1, 5);
-        testEntity = ParentArticleEntity.of(ArticleType.NORMAL, "Test Title", "Test Content", popularity, false);
+        testEntity = ParentArticleEntity.of(ArticleType.NORMAL, "Test Title", "Test Content", 1L, popularity, false);
         repository.save(testEntity);
     }
 
@@ -43,7 +43,7 @@ public class IParentArticleEntityRepositoryTest {
     @Test
     void save_shouldPersistEntity() {
         PopularityEmbeddable newPopularity = new PopularityEmbeddable(200, 20, 2, 10);
-        ParentArticleEntity newEntity = ParentArticleEntity.of(ArticleType.ANNOUNCEMENT, "New Title", "New Content", newPopularity, false);
+        ParentArticleEntity newEntity = ParentArticleEntity.of(ArticleType.ANNOUNCEMENT, "New Title", "New Content", 2L, newPopularity, false);
         
         ParentArticleEntity savedEntity = repository.save(newEntity);
         Assertions.assertNotNull(savedEntity.getId());
@@ -52,10 +52,27 @@ public class IParentArticleEntityRepositoryTest {
 
     @Test
     void save_shouldUpdateExistingEntity() {
-        testEntity = ParentArticleEntity.of(testEntity.getId(), ArticleType.DISCUSSION, "Updated Title", "Updated Content", testEntity.getPopularityEmbeddable(), true);
+        testEntity = ParentArticleEntity.of(testEntity.getId(), ArticleType.DISCUSSION, "Updated Title", "Updated Content", 1L, testEntity.getPopularityEmbeddable(), true);
         ParentArticleEntity updatedEntity = repository.save(testEntity);
 
         Assertions.assertEquals("Updated Title", updatedEntity.getTitle());
         Assertions.assertTrue(updatedEntity.getDeleted());
+    }
+
+    // Additional test cases to ensure robustness
+    @Test
+    void save_shouldNotPersistEntityWithNullTitle() {
+        PopularityEmbeddable popularity = new PopularityEmbeddable(50, 5, 0, 2);
+        ParentArticleEntity invalidEntity = ParentArticleEntity.of(ArticleType.NEWS, null, "Content without title", 3L, popularity, false);
+
+        Assertions.assertThrows(Exception.class, () -> repository.save(invalidEntity));
+    }
+
+    @Test
+    void save_shouldNotPersistEntityWithNullContent() {
+        PopularityEmbeddable popularity = new PopularityEmbeddable(50, 5, 0, 2);
+        ParentArticleEntity invalidEntity = ParentArticleEntity.of(ArticleType.NEWS, "Title without content", null, 3L, popularity, false);
+
+        Assertions.assertThrows(Exception.class, () -> repository.save(invalidEntity));
     }
 }

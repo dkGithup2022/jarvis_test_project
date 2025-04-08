@@ -1,5 +1,4 @@
-
-package com.jarvis.sample.simpleboard.fixture.user.user;
+package com.jarvis.sample.simpleboard.fixture.infra.user.user;
 
 import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;

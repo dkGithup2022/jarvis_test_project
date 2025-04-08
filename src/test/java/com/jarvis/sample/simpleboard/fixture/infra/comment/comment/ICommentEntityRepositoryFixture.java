@@ -2,12 +2,17 @@ package com.jarvis.sample.simpleboard.fixture.comment.comment;
 
 import com.jarvis.sample.simpleboard.infra.comment.CommentEntity;
 import com.jarvis.sample.simpleboard.infra.comment.api.ICommentEntityRepository;
+import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * ICommentEntityRepository 테스트용 픽스처 클래스.
@@ -37,6 +42,16 @@ public class ICommentEntityRepositoryFixture implements ICommentEntityRepository
         FakeSetter.setField(entity, "id", newId);
         db.put(newId, entity);
         return entity;
+    }
+
+    @Override
+    public List<CommentEntity> listByArticleId(ArticleType articleType, Long articleId, PageRequest pageRequest) {
+        return db.values().stream()
+            .filter(comment -> comment.getArticleType().equals(articleType) && comment.getArticleId().equals(articleId))
+            .sorted((c1, c2) -> Long.compare(c1.getId(), c2.getId()))
+            .skip(pageRequest.getPageNumber() * pageRequest.getPageSize())
+            .limit(pageRequest.getPageSize())
+            .collect(Collectors.toList());
     }
 
     @Override

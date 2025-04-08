@@ -2,6 +2,7 @@ package com.jarvis.sample.simpleboard.domain.user.api.user;
 
 
 
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 
@@ -9,4 +10,12 @@ import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
         fileType = FileType.DOMAIN_API
 )
 public interface UserReader {
+
+    /*
+    [설명]
+    간단한 User 조회 api
+    repo 의 값을 읽은 뒤,entity 를 데이터 스펙으로 mapping 해서 리턴한다.
+    조회 결과가 없는 경우, null 을 리턴, 커스텀한 exception 은 없다.
+    */
+    User findById(Long userId);
 }
