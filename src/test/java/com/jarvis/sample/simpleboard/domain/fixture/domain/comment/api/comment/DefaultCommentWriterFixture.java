@@ -1,5 +1,7 @@
 package com.jarvis.sample.simpleboard.domain.fixture.comment.api.comment;
 
+import com.jarvis.sample.simpleboard.domain.comment.api.comment.CommentWriter;
+import com.jarvis.sample.simpleboard.domain.comment.api.comment.DefaultCommentWriter;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 

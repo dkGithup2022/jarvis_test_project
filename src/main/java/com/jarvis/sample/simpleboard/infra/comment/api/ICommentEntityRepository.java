@@ -2,8 +2,11 @@
 package com.jarvis.sample.simpleboard.infra.comment.api;
 
 
+import com.jarvis.sample.simpleboard.infra.comment.CommentEntity;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
+
+import java.util.Optional;
 
 /**
  * ICommentEntityRepository 테스트용 픽스처 클래스.
@@ -18,4 +21,14 @@ import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
  */
 public interface ICommentEntityRepository {
     // TODO: define methods if needed
+
+ Optional<CommentEntity> findById(Long id);             // 1. 단건 조회
+
+ CommentEntity save(CommentEntity entity);              // 2. 삽입 및 수정
+
+
+ Optional<Integer> findMaxRootOrderByArticleId(Long articleId);
+
+ Optional<CommentEntity> findTopByParentIdOrderByCommentSeqDesc( Long parentId); // 3. 대댓글 순번
+
 }

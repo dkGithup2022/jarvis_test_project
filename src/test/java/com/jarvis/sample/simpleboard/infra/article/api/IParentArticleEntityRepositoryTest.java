@@ -1,28 +1,61 @@
 package com.jarvis.sample.simpleboard.infra.article.api;
 
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
-import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
 import com.jarvis.sample.simpleboard.infra.article.jpa.ParentArticleEntityRepository;
-
-
-
-import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
-import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
-
-
+import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
+import java.util.Optional;
 
 @DataJpaTest
-@JarvisMeta(
-    fileType = FileType.INFRA_REPOSITORY_TEST,
-    references = { ParentArticleEntity.class, IParentArticleEntityRepository.class, ParentArticleEntityRepository.class }
-)
 public class IParentArticleEntityRepositoryTest {
 
+    @Autowired
+    private ParentArticleEntityRepository repository;
+
+    private ParentArticleEntity testEntity;
+
+    @BeforeEach
+    void setUp() {
+        PopularityEmbeddable popularity = new PopularityEmbeddable(100, 10, 1, 5);
+        testEntity = ParentArticleEntity.of(ArticleType.NORMAL, "Test Title", "Test Content", popularity, false);
+        repository.save(testEntity);
+    }
+
     @Test
-    void test_defaultBehavior() {
-        // TODO: implement tests
+    void findById_shouldReturnEntityWhenIdExists() {
+        Optional<ParentArticleEntity> foundEntity = repository.findById(testEntity.getId());
+        Assertions.assertTrue(foundEntity.isPresent());
+        Assertions.assertEquals(testEntity.getTitle(), foundEntity.get().getTitle());
+    }
+
+    @Test
+    void findById_shouldReturnEmptyWhenIdDoesNotExist() {
+        Optional<ParentArticleEntity> foundEntity = repository.findById(-1L);
+        Assertions.assertFalse(foundEntity.isPresent());
+    }
+
+    @Test
+    void save_shouldPersistEntity() {
+        PopularityEmbeddable newPopularity = new PopularityEmbeddable(200, 20, 2, 10);
+        ParentArticleEntity newEntity = ParentArticleEntity.of(ArticleType.ANNOUNCEMENT, "New Title", "New Content", newPopularity, false);
+        
+        ParentArticleEntity savedEntity = repository.save(newEntity);
+        Assertions.assertNotNull(savedEntity.getId());
+        Assertions.assertEquals("New Title", savedEntity.getTitle());
+    }
+
+    @Test
+    void save_shouldUpdateExistingEntity() {
+        testEntity = ParentArticleEntity.of(testEntity.getId(), ArticleType.DISCUSSION, "Updated Title", "Updated Content", testEntity.getPopularityEmbeddable(), true);
+        ParentArticleEntity updatedEntity = repository.save(testEntity);
+
+        Assertions.assertEquals("Updated Title", updatedEntity.getTitle());
+        Assertions.assertTrue(updatedEntity.getDeleted());
     }
 }
