@@ -1,5 +1,9 @@
 package com.jarvis.sample.simpleboard.domain.user.api.user;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
+import com.jarvis.sample.simpleboard.common.type.UserRole;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -13,8 +17,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_TEST,
-    references = { User.class, DefaultUserValidator.class, UserValidator.class }
+        fileType = FileType.DOMAIN_API_TEST,
+        references = {User.class, DefaultUserValidator.class, UserValidator.class}
 )
 public class UserValidatorTest {
 
@@ -22,11 +26,15 @@ public class UserValidatorTest {
     private DefaultUserValidator userValidator;
     private User testUser;
 
+    private UserEntity testUserEntity;
+
     @BeforeEach
     void setup() {
         fixture = new IUserEntityRepositoryFixture();
         userValidator = new DefaultUserValidator(fixture);
         testUser = User.of(1L, "validNickname", new HashSet<>());
+        testUserEntity = UserEntity.of("pass", "validNickname", new HashSet<>());
+        FakeSetter.setField(testUser, "id", 1L);
     }
 
     @Test
@@ -34,8 +42,8 @@ public class UserValidatorTest {
         String nickname = "uniqueNickname";
 
         // Assume nickname does not exist in the repository
-        fixture.clear();
-        
+        //fixture.clear();
+
         boolean result = userValidator.canUseNickname(nickname);
 
         Assertions.assertTrue(result);
@@ -54,7 +62,7 @@ public class UserValidatorTest {
     void canUseNickname_shouldReturnFalse_whenNicknameExistsInDb() {
         String nickname = "existingNickname";
 
-        fixture.saveNickname(nickname);
+        fixture.save(UserEntity.of("aaa", nickname, Set.of(UserRole.USER)));
 
         boolean result = userValidator.canUseNickname(nickname);
 
@@ -64,7 +72,7 @@ public class UserValidatorTest {
     @Test
     void canUpdate_shouldReturnTrue_whenUserIdMatchesAndExistsInDb() {
         Long requestUserId = 1L;
-        fixture.saveUser(testUser);
+        fixture.save(testUserEntity);
 
         boolean result = userValidator.canUpdate(requestUserId, testUser);
 
@@ -93,7 +101,7 @@ public class UserValidatorTest {
     @Test
     void canDelete_shouldReturnTrue_whenUserIdMatchesAndExistsInDb() {
         Long requestUserId = 1L;
-        fixture.saveUser(testUser);
+        fixture.save(testUserEntity);
 
         boolean result = userValidator.canDelete(requestUserId, testUser);
 
@@ -118,7 +126,7 @@ public class UserValidatorTest {
             userValidator.canDelete(requestUserId, nonExistentUser);
         });
     }
-} 
+}
 
 // Notes: 
 // 1. IUserEntityRepositoryFixture methods like `saveNickname` and `saveUser` are assumed to be implemented for test setup.

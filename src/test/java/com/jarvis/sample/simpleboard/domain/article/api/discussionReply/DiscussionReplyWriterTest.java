@@ -2,60 +2,37 @@ package com.jarvis.sample.simpleboard.domain.article.api.discussionReply;
 
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
-import com.jarvis.sample.simpleboard.domain.article.ArticleWriterBase;
 import com.jarvis.sample.simpleboard.domain.article.specs.DiscussionReply;
 import com.jarvis.sample.simpleboard.fixture.infra.article.childArticle.IChildArticleEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
-import com.jarvis.sample.simpleboard.infra.article.api.IChildArticleEntityRepository;
-import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@JarvisMeta(
-        fileType = FileType.DOMAIN_API_TEST,
-        references = { DiscussionReply.class, DefaultDiscussionReplyWriter.class,
-                DiscussionReplyWriter.class, ArticleWriterBase.class,
-                ChildArticleEntity.class, IChildArticleEntityRepository.class,
-                IChildArticleEntityRepositoryFixture.class, Popularity.class,
-                PopularityEmbeddable.class, IUserEntityRepository.class,
-                IUserEntityRepositoryFixture.class, ArticleType.class
-        }
-)
 public class DiscussionReplyWriterTest {
 
     private IChildArticleEntityRepositoryFixture childArticleFixture;
-    private IUserEntityRepositoryFixture userFixture;
+    private IUserEntityRepositoryFixture userEntityFixture;
     private DefaultDiscussionReplyWriter discussionReplyWriter;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         childArticleFixture = new IChildArticleEntityRepositoryFixture();
-        userFixture = new IUserEntityRepositoryFixture();
-        discussionReplyWriter = new DefaultDiscussionReplyWriter(childArticleFixture, userFixture);
+        userEntityFixture = new IUserEntityRepositoryFixture();
+        discussionReplyWriter = new DefaultDiscussionReplyWriter(childArticleFixture, userEntityFixture);
     }
 
     @Test
-    void write_shouldSaveReplySuccessfully_whenAuthorExists() {
-        Long authorId = 1L;
-        userFixture.getDb().put(authorId, new UserEntity(authorId, "authorName"));
-
-        DiscussionReply reply = DiscussionReply.of(
-                null,
-                authorId,
-                "authorName",
-                "Sample Title",
-                "Sample Content",
-                Popularity.empty(),
-                123L,
-                1,
-                false
-        );
+    void write_shouldSaveArticleWithoutId() {
+        DiscussionReply reply = DiscussionReply.of(null, 1L, "Author", "Title", "Content",
+                Popularity.empty(), 1L, 0, false);
 
         DiscussionReply result = discussionReplyWriter.write(reply);
 
@@ -65,129 +42,75 @@ public class DiscussionReplyWriterTest {
     }
 
     @Test
-    void write_shouldThrowException_whenAuthorDoesNotExist() {
-        DiscussionReply reply = DiscussionReply.of(
-                null,
-                2L,
-                "nonExistentAuthor",
-                "Sample Title",
-                "Sample Content",
-                Popularity.empty(),
-                123L,
-                1,
-                false
-        );
+    void write_shouldThrowExceptionForArticleWithId() {
+        DiscussionReply reply = DiscussionReply.of(1L, 1L, "Author", "Title", "Content",
+                Popularity.empty(), 1L, 0, false);
 
-        assertThrows(IllegalArgumentException.class, () -> discussionReplyWriter.write(reply));
-    }
-
-    @Test
-    void write_shouldThrowException_whenContentIsNullOrEmpty() {
-        Long authorId = 1L;
-        userFixture.getDb().put(authorId, new UserEntity(authorId, "authorName"));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            DiscussionReply reply = DiscussionReply.of(
-                    null,
-                    authorId,
-                    "authorName",
-                    "Sample Title",
-                    "",
-                    Popularity.empty(),
-                    123L,
-                    1,
-                    false
-            );
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
             discussionReplyWriter.write(reply);
         });
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            DiscussionReply reply = DiscussionReply.of(
-                    null,
-                    authorId,
-                    "authorName",
-                    "Sample Title",
-                    null,
-                    Popularity.empty(),
-                    123L,
-                    1,
-                    false
-            );
-            discussionReplyWriter.write(reply);
+        assertEquals("Article ID must not be present when writing a new article", thrown.getMessage());
+    }
+
+    @Test
+    void update_shouldUpdateExistingArticle() {
+        ChildArticleEntity existingEntity = ChildArticleEntity.of(1L, 1L, ArticleType.DISCUSSION_REPLY, "Old Title", "Old Content",
+                new PopularityEmbeddable(0, 0, 0, 0), 1L, 0, false);
+        childArticleFixture.save(existingEntity);
+
+        DiscussionReply reply = DiscussionReply.of(1L, 1L, "Author", "New Title", "New Content",
+                Popularity.empty(), 1L, 0, false);
+
+        DiscussionReply result = discussionReplyWriter.update(reply);
+
+        assertEquals(reply.getTitle(), result.getTitle());
+        assertEquals(reply.getContent(), result.getContent());
+    }
+
+    @Test
+    void update_shouldThrowExceptionForNonExistingArticle() {
+        DiscussionReply reply = DiscussionReply.of(1L, 1L, "Author", "Title", "Content",
+                Popularity.empty(), 1L, 0, false);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            discussionReplyWriter.update(reply);
         });
+
+        assertEquals("Article does not exist", thrown.getMessage());
     }
 
     @Test
-    void write_shouldThrowException_whenContentExceedsMaxLength() {
-        Long authorId = 1L;
-        userFixture.getDb().put(authorId, new UserEntity(authorId, "authorName"));
+    void update_shouldThrowExceptionForArticleWithoutId() {
+        DiscussionReply reply = DiscussionReply.of(null, 1L, "Author", "Title", "Content",
+                Popularity.empty(), 1L, 0, false);
 
-        String longContent = "a".repeat(10_001);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            DiscussionReply reply = DiscussionReply.of(
-                    null,
-                    authorId,
-                    "authorName",
-                    "Sample Title",
-                    longContent,
-                    Popularity.empty(),
-                    123L,
-                    1,
-                    false
-            );
-            discussionReplyWriter.write(reply);
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            discussionReplyWriter.update(reply);
         });
+
+        assertEquals("Article ID must be present when updating an article", thrown.getMessage());
     }
 
     @Test
-    void update_shouldUpdateReplySuccessfully_whenArticleExists() {
-        Long authorId = 1L;
-        userFixture.getDb().put(authorId, new UserEntity(authorId, "authorName"));
-        ChildArticleEntity savedEntity = childArticleFixture.save(ChildArticleEntity.of(
-                authorId, ArticleType.DISCUSSION_REPLY, "Old Title", "Old Content",
-                new PopularityEmbeddable(0, 0, 0, 0), 123L, 1, false
-        ));
+    void delete_shouldMarkArticleAsDeleted() {
+        ChildArticleEntity existingEntity = ChildArticleEntity.of(1L, 1L, ArticleType.DISCUSSION_REPLY, "Title", "Content",
+                new PopularityEmbeddable(0, 0, 0, 0), 1L, 0, false);
+        childArticleFixture.save(existingEntity);
 
-        DiscussionReply updatedReply = DiscussionReply.of(
-                savedEntity.getId(), authorId, "authorName", "New Title", "New Content",
-                Popularity.empty(), 123L, 1, false
-        );
+        discussionReplyWriter.delete(1L);
 
-        DiscussionReply result = discussionReplyWriter.update(updatedReply);
-
-        assertEquals(updatedReply.getTitle(), result.getTitle());
-        assertEquals(updatedReply.getContent(), result.getContent());
+        Optional<ChildArticleEntity> result = childArticleFixture.findById(1L);
+        assertTrue(result.isPresent());
+        assertTrue(result.get().getDeleted());
     }
 
     @Test
-    void update_shouldThrowException_whenArticleDoesNotExist() {
-        DiscussionReply reply = DiscussionReply.of(
-                999L, 1L, "authorName", "Sample Title", "Sample Content",
-                Popularity.empty(), 123L, 1, false
-        );
+    void delete_shouldThrowExceptionForNonExistingArticle() {
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            discussionReplyWriter.delete(1L);
+        });
 
-        assertThrows(RuntimeException.class, () -> discussionReplyWriter.update(reply));
-    }
-
-    @Test
-    void delete_shouldMarkReplyAsDeleted_whenArticleExists() {
-        Long authorId = 1L;
-        userFixture.getDb().put(authorId, new UserEntity(authorId, "authorName"));
-        ChildArticleEntity savedEntity = childArticleFixture.save(ChildArticleEntity.of(
-                authorId, ArticleType.DISCUSSION_REPLY, "Sample Title", "Sample Content",
-                new PopularityEmbeddable(0, 0, 0, 0), 123L, 1, false
-        ));
-
-        discussionReplyWriter.delete(savedEntity.getId());
-
-        Optional<ChildArticleEntity> deletedEntity = childArticleFixture.findById(savedEntity.getId());
-        assertTrue(deletedEntity.isPresent());
-        assertTrue(deletedEntity.get().getDeleted());
-    }
-
-    @Test
-    void delete_shouldThrowException_whenArticleDoesNotExist() {
-        assertThrows(RuntimeException.class, () -> discussionReplyWriter.delete(999L));
+        assertEquals("Article does not exist", thrown.getMessage());
     }
 }

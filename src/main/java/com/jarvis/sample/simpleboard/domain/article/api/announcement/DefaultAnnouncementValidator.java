@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import com.jarvis.sample.simpleboard.infra.article.ArticleEntity;
+import org.springframework.stereotype.Component;
 
 // TODO: 메모기록-> 잘못된 import 경로
 
@@ -26,6 +27,7 @@ import com.jarvis.sample.simpleboard.infra.article.ArticleEntity;
             ArticleType.class }
 )
 @RequiredArgsConstructor
+@Component
 public class DefaultAnnouncementValidator implements AnnouncementValidator {
     
     private final IUserEntityRepository userEntityRepository;
@@ -38,12 +40,12 @@ public class DefaultAnnouncementValidator implements AnnouncementValidator {
 
     @Override
     public boolean canUpdate(Announcement article, User user) {
-        return articleExists(article.getId()) && userExists(user.getUserId()) && article.getAuthorId().equals(user.getId());
+        return articleExists(article.getId()) && userExists(user.getUserId()) && article.getAuthorId().equals(user.getUserId());
     }
 
     @Override
     public boolean canDelete(Announcement article, User user) {
-        return articleExists(article.getId()) && userExists(user.getUserId()) && article.getAuthorId().equals(user.getId());
+        return articleExists(article.getId()) && userExists(user.getUserId()) && article.getAuthorId().equals(user.getUserId());
     }
 
     private boolean articleExists(Long articleId) {

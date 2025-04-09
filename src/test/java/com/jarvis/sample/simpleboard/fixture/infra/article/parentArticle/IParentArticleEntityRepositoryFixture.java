@@ -1,4 +1,4 @@
-package com.jarvis.sample.simpleboard.fixture.article.parentArticle;
+package com.jarvis.sample.simpleboard.fixture.infra.article.parentArticle;
 
 import com.jarvis.sample.simpleboard.FakeSetter;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;

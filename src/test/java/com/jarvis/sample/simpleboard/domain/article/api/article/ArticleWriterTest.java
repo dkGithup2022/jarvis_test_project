@@ -1,33 +1,40 @@
 package com.jarvis.sample.simpleboard.domain.article.api.article;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.common.type.UserRole;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
+import com.jarvis.sample.simpleboard.domain.article.ArticleReaderBase;
 import com.jarvis.sample.simpleboard.domain.article.ArticleWriterBase;
+import com.jarvis.sample.simpleboard.domain.article.specs.Article;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import com.jarvis.sample.simpleboard.fixture.infra.article.article.IArticleEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.infra.article.ArticleEntity;
+import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
 import com.jarvis.sample.simpleboard.infra.article.api.IArticleEntityRepository;
 import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 
 import java.util.Optional;
 import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_TEST,
-    references = { Article.class, DefaultArticleWriter.class, ArticleWriter.class,
-            ArticleWriterBase.class,
-            UserEntity.class, IUserEntityRepositoryFixture.class,
-            ArticleEntity.class, IArticleEntityRepositoryFixture.class,
-            ArticleType.class, Popularity.class
-    }
+        fileType = FileType.DOMAIN_API_TEST,
+        references = {
+                Article.class, DefaultArticleWriter.class, ArticleWriter.class,
+                ArticleWriterBase.class,
+                UserEntity.class, IUserEntityRepositoryFixture.class,
+                ArticleEntity.class, IArticleEntityRepositoryFixture.class,
+                User.class, PopularityEmbeddable.class,
+                UserRole.class,
+                ArticleType.class, Popularity.class
+        }
 )
 public class ArticleWriterTest {
 
@@ -45,8 +52,7 @@ public class ArticleWriterTest {
     @Test
     void write_shouldSaveNewArticle() {
         UserEntity author = UserEntity.of("encodedPassword", "authorNickname", Set.of());
-        // Simulating saving user
-        userFixture.db.put(1L, author);
+        userFixture.save(author);
 
         Article article = Article.of(null, 1L, "authorNickname", "Title", "Content", Popularity.empty(), false);
 
@@ -78,10 +84,10 @@ public class ArticleWriterTest {
     @Test
     void update_shouldUpdateExistingArticle() {
         UserEntity author = UserEntity.of("encodedPassword", "authorNickname", Set.of());
-        userFixture.db.put(1L, author);
+        userFixture.save(author);
 
-        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.NORMAL, "Title", "Content", null, false);
-        articleFixture.db.put(1L, articleEntity);
+        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.ARTICLE, "Title", "Content", null, false);
+        articleFixture.save(articleEntity);
 
         Article article = Article.of(1L, 1L, "authorNickname", "Updated Title", "Updated Content", Popularity.empty(), false);
 
@@ -110,8 +116,8 @@ public class ArticleWriterTest {
 
     @Test
     void delete_shouldMarkArticleAsDeleted() {
-        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.NORMAL, "Title", "Content", null, false);
-        articleFixture.db.put(1L, articleEntity);
+        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.ARTICLE, "Title", "Content", null, false);
+        articleFixture.save(articleEntity);
 
         articleWriter.delete(1L);
 

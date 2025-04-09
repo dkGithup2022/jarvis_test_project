@@ -13,6 +13,7 @@ import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.comment.specs.Comment;
 import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
 
@@ -23,6 +24,7 @@ import java.util.EnumSet;
         }
 )
 @RequiredArgsConstructor
+@Component
 public class DefaultCommentValidator implements CommentValidator {
 
     private final ICommentEntityRepository commentEntityRepository;

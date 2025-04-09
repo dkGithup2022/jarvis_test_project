@@ -1,6 +1,8 @@
 package com.jarvis.sample.simpleboard.domain.article.api.discussionReply;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.common.type.UserRole;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleReaderBase;
 import com.jarvis.sample.simpleboard.domain.article.specs.DiscussionReply;
@@ -9,12 +11,16 @@ import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityReposito
 import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
 import com.jarvis.sample.simpleboard.infra.article.api.IChildArticleEntityRepository;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
-import com.jarvis.sample.simpleboard.infra.user.api.UserEntity;
+
+import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
+import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,7 +54,8 @@ public class DiscussionReplyReaderTest {
 
     @Test
     void read_shouldReturnDiscussionReply_whenArticleExistsAndIsNotDeleted() {
-        UserEntity userEntity = new UserEntity(1L, "authorNickname");
+        UserEntity userEntity = UserEntity.of("pw", "authorNickname", Set.of(UserRole.USER));
+        FakeSetter.setField(userEntity, "id", 1L);
         userFixture.save(userEntity);
 
         ChildArticleEntity articleEntity = ChildArticleEntity.of(

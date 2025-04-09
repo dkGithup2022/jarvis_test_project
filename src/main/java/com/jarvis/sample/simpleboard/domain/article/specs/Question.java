@@ -7,6 +7,7 @@ import com.jarvis.sample.simpleboard.domain.article.ArticleBase;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import lombok.Getter;
+import lombok.Setter;
 
 @JarvisMeta(
         fileType = FileType.DOMAIN_SPEC
@@ -62,5 +63,15 @@ public class Question implements ArticleBase {
         if (content == null || content.length() > CONTENT_MAX_LENGTH) {
             throw new IllegalArgumentException("내용이 비어있거나 10,000자를 초과할 수 없습니다.");
         }
+    }
+
+    @Override
+    public void updateTitle(String title) {
+        this.title =title;
+    }
+
+    @Override
+    public void updateContent(String content) {
+        this.content = content;
     }
 }

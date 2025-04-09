@@ -1,8 +1,8 @@
-package com.jarvis.sample.simpleboard.domain.fixture.comment.api.comment;
+package com.jarvis.sample.simpleboard.domain.fixture.domain.comment.api.comment;
 
 import com.jarvis.sample.simpleboard.domain.comment.api.comment.CommentWriter;
 import com.jarvis.sample.simpleboard.domain.comment.api.comment.DefaultCommentWriter;
-import com.jarvis.sample.simpleboard.domain.fixture.comment.repository.ICommentEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.fixture.infra.comment.comment.ICommentEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 

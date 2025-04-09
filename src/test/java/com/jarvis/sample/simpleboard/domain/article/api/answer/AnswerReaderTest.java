@@ -1,16 +1,19 @@
 package com.jarvis.sample.simpleboard.domain.article.api.answer;
 
+import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.fixture.infra.article.childArticle.IChildArticleEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
+import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
+import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
+import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.jarvis.sample.simpleboard.domain.article.specs.Answer;
-import com.jarvis.sample.simpleboard.domain.article.specs.Popularity;
-import com.jarvis.sample.simpleboard.domain.article.specs.ArticleType;
-import com.jarvis.sample.simpleboard.domain.article.specs.ChildArticleEntity;
-import com.jarvis.sample.simpleboard.infra.IChildArticleEntityRepositoryFixture;
-import com.jarvis.sample.simpleboard.infra.IUserEntityRepositoryFixture;
+
 
 import java.util.List;
 import java.util.Optional;

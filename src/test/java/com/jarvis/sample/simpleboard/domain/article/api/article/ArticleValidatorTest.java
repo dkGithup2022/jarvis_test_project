@@ -1,8 +1,11 @@
 package com.jarvis.sample.simpleboard.domain.article.api.article;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.common.type.UserRole;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleValidatorBase;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import com.jarvis.sample.simpleboard.fixture.infra.article.article.IArticleEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.infra.article.ArticleEntity;
@@ -19,10 +22,10 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_TEST,
-    references = {Article.class, DefaultArticleValidator.class, ArticleValidator.class,
-            ArticleValidatorBase.class, UserEntity.class, IUserEntityRepositoryFixture.class,
-            ArticleEntity.class, IArticleEntityRepositoryFixture.class, ArticleType.class, Popularity.class}
+        fileType = FileType.DOMAIN_API_TEST,
+        references = {Article.class, DefaultArticleValidator.class, ArticleValidator.class,
+                ArticleValidatorBase.class, UserEntity.class, IUserEntityRepositoryFixture.class,
+                ArticleEntity.class, IArticleEntityRepositoryFixture.class, ArticleType.class, Popularity.class}
 )
 public class ArticleValidatorTest {
 
@@ -37,80 +40,89 @@ public class ArticleValidatorTest {
         articleValidator = new DefaultArticleValidator(articleFixture, userFixture);
     }
 
+    private UserEntity saveUser(IUserEntityRepositoryFixture fixture, Long id) {
+        UserEntity user = UserEntity.of("passwordEncoded", "nickname", Set.of(UserRole.USER));
+        FakeSetter.setField(user, "id", 1L);
+        return fixture.save(user);
+    }
+
+    private User getUserDomain(Long id) {
+        var entity = userFixture.findById(id).get();
+        return User.of(entity.getId(), entity.getNickname(), entity.getUserRole());
+    }
+
     @Test
     void canWrite_shouldReturnFalseIfUserRolesAreEmpty() {
-        User user = new User(1L, "nick", Set.of());
+        var user = saveUser(userFixture, 1L);
         Article article = Article.of(null, null, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertFalse(articleValidator.canWrite(article, user));
+        assertFalse(articleValidator.canWrite(article, getUserDomain(1L)));
     }
 
     @Test
     void canWrite_shouldReturnFalseIfArticleHasId() {
-        User user = new User(1L, "nick", Set.of(UserRole.USER));
+        var user = saveUser(userFixture, 1L);
         Article article = Article.of(1L, null, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertFalse(articleValidator.canWrite(article, user));
+        assertFalse(articleValidator.canWrite(article, getUserDomain(1L)));
     }
 
     @Test
     void canWrite_shouldReturnTrueForValidArticleAndUser() {
-        User user = new User(1L, "nick", Set.of(UserRole.USER));
+        var user = saveUser(userFixture, 1L);
         Article article = Article.of(null, null, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertTrue(articleValidator.canWrite(article, user));
+        assertTrue(articleValidator.canWrite(article, getUserDomain(1L)));
     }
 
     @Test
     void canUpdate_shouldReturnFalseIfAuthorIdDoesNotMatchUserId() {
-        User user = new User(2L, "nick", Set.of(UserRole.USER));
+        var user = saveUser(userFixture, 1L);
         Article article = Article.of(1L, 1L, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertFalse(articleValidator.canUpdate(article, user));
+        assertFalse(articleValidator.canUpdate(article, getUserDomain(1L)));
     }
 
     @Test
     void canUpdate_shouldReturnFalseIfArticleOrUserDoesNotExist() {
-        User user = new User(1L, "nick", Set.of(UserRole.USER));
+        var user = saveUser(userFixture, 1L);
         Article article = Article.of(1L, 1L, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertFalse(articleValidator.canUpdate(article, user));
+        assertFalse(articleValidator.canUpdate(article, getUserDomain(1L)));
     }
 
     @Test
     void canUpdate_shouldReturnTrueIfArticleAndUserExistAndMatch() {
-        User user = new User(1L, "nick", Set.of(UserRole.USER));
-        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.NORMAL, "Title", "Content", null, false);
-        UserEntity userEntity = UserEntity.of("encodedPass", "nick", Set.of(UserRole.USER));
+        var user = saveUser(userFixture, 1L);
+        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.ARTICLE, "Title", "Content", null, false);
 
         articleFixture.save(articleEntity);
-        userFixture.save(userEntity);
 
         Article article = Article.of(1L, 1L, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertTrue(articleValidator.canUpdate(article, user));
+        assertTrue(articleValidator.canUpdate(article, getUserDomain(1L)));
     }
 
     @Test
     void canDelete_shouldReturnFalseIfAuthorIdDoesNotMatchUserId() {
-        User user = new User(2L, "nick", Set.of(UserRole.USER));
+        var user = saveUser(userFixture, 1L);
         Article article = Article.of(1L, 1L, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertFalse(articleValidator.canDelete(article, user));
+        assertFalse(articleValidator.canDelete(article,  getUserDomain(1L)));
     }
 
     @Test
     void canDelete_shouldReturnFalseIfArticleOrUserDoesNotExist() {
-        User user = new User(1L, "nick", Set.of(UserRole.USER));
+        var user = saveUser(userFixture, 1L);
         Article article = Article.of(1L, 1L, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertFalse(articleValidator.canDelete(article, user));
+        assertFalse(articleValidator.canDelete(article, getUserDomain(1L)));
     }
 
     @Test
     void canDelete_shouldReturnTrueIfArticleAndUserExistAndMatch() {
-        User user = new User(1L, "nick", Set.of(UserRole.USER));
-        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.NORMAL, "Title", "Content", null, false);
+        var user = saveUser(userFixture, 1L);
+        ArticleEntity articleEntity = ArticleEntity.of(1L, 1L, ArticleType.ARTICLE, "Title", "Content", null, false);
         UserEntity userEntity = UserEntity.of("encodedPass", "nick", Set.of(UserRole.USER));
 
         articleFixture.save(articleEntity);
@@ -118,6 +130,6 @@ public class ArticleValidatorTest {
 
         Article article = Article.of(1L, 1L, "nick", "Title", "Content", Popularity.empty(), false);
 
-        assertTrue(articleValidator.canDelete(article, user));
+        assertTrue(articleValidator.canDelete(article, getUserDomain(1L)));
     }
 }

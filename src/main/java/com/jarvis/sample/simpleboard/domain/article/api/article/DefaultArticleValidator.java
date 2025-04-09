@@ -11,6 +11,7 @@ import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.article.specs.Article;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
         ArticleType.class, Popularity.class
     }
 )
+@Component
 public class DefaultArticleValidator implements ArticleValidator {
 
     private final IArticleEntityRepository articleEntityRepository;

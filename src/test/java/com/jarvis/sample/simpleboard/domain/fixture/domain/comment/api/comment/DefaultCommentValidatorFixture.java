@@ -1,12 +1,12 @@
-package com.jarvis.sample.simpleboard.domain.fixture.comment.api.comment;
+package com.jarvis.sample.simpleboard.domain.fixture.domain.comment.api.comment;
 
+import com.jarvis.sample.simpleboard.domain.comment.api.comment.CommentValidator;
+import com.jarvis.sample.simpleboard.domain.comment.api.comment.DefaultCommentValidator;
+import com.jarvis.sample.simpleboard.fixture.infra.comment.comment.ICommentEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.comment.specs.Comment;
-import com.jarvis.sample.simpleboard.domain.comment.specs.CommentValidator;
-import com.jarvis.sample.simpleboard.domain.comment.impl.DefaultCommentValidator;
-import com.jarvis.sample.simpleboard.domain.fixture.comment.repository.ICommentEntityRepositoryFixture;
-import com.jarvis.sample.simpleboard.domain.fixture.user.repository.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.domain.user.specs.User;
 
 @JarvisMeta(

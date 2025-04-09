@@ -29,6 +29,16 @@ public class Article implements ArticleBase {
         return new Article(id, authorId, authorNickname, title, content, popularity, deleted);
     }
 
+
+    @Override
+    public void updateTitle(String title) {
+        this.title =title;
+    }
+
+    @Override
+    public void updateContent(String content) {
+        this.content = content;
+    }
     private Article(Long id, Long authorId, String authorNickname, String title, String content, Popularity popularity, Boolean deleted) {
         if (title == null || title.isBlank())
             throw new IllegalArgumentException("제목은 비어있을 수 없습니다.");

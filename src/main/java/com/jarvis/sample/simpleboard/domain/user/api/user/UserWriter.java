@@ -15,8 +15,12 @@ public interface UserWriter {
      * [설명]
      *    새로운 유저 데이터를  entity 로 매핑하여 save 한다.
      *     입력 받는 user 객체의 id 는 null 이여야 한다 아닐 시 runtimeException
+     *
+     * 유저 엔티티를 만들어 저장한다.
+     * UserRole 을 Set.of(User) 로서 지정하여 저장.
+     * password 는 spring 에서 사용할 수 있는 적절한 encoder 로 인코딩하여 저장한다.
      */
-    User createUser(User user);
+    User createUser(String nickname, String password);
 
 
     /*
@@ -27,7 +31,7 @@ public interface UserWriter {
      *
      *   새로운 User 값으로 매핑하여  entity 를 다시 save  한다. 같은 id 에 대해 save
      */
-    User updateUser(String nickname, String password);
+    User updateUser(User user);
 
 
     /*

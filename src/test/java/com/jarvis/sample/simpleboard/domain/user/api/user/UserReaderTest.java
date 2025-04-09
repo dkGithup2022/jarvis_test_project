@@ -1,5 +1,9 @@
 package com.jarvis.sample.simpleboard.domain.user.api.user;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
+import com.jarvis.sample.simpleboard.common.type.UserRole;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +17,8 @@ import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.user.specs.User;
 
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_TEST,
-    references = { User.class, DefaultUserReader.class, UserReader.class }
+        fileType = FileType.DOMAIN_API_TEST,
+        references = {User.class, DefaultUserReader.class, UserReader.class}
 )
 public class UserReaderTest {
 
@@ -30,7 +34,8 @@ public class UserReaderTest {
     @Test
     void findById_shouldReturnUserWhenUserExists() {
         Long userId = 1L;
-        UserEntity userEntity = new UserEntity(userId, "JohnDoe", Set.of(UserRole.USER));
+        UserEntity userEntity = UserEntity.of("passwordencodec", "JohnDoe", Set.of(UserRole.USER));
+        FakeSetter.setField(userEntity, "id", userId);
         fixture.save(userEntity);
 
         User result = userReader.findById(userId);

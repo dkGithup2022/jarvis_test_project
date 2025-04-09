@@ -1,57 +1,50 @@
 package com.jarvis.sample.simpleboard.domain.article.api.question;
 
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
-import com.jarvis.sample.simpleboard.common.type.UserRole;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.specs.Question;
+import com.jarvis.sample.simpleboard.fixture.infra.article.parentArticle.IParentArticleEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
 import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
-import com.jarvis.sample.simpleboard.infra.user.UserEntity;
-import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @JarvisMeta(
         fileType = FileType.DOMAIN_API_TEST,
-        references = {Question.class, DefaultQuestionWriter.class, QuestionWriter.class,
-                UserEntity.class, IUserEntityRepository.class,
-                ParentArticleEntity.class, IParentArticleEntityRepository.class,
-                ArticleType.class, UserRole.class,
-                Popularity.class}
+        references = {
+                Question.class, DefaultQuestionWriter.class, QuestionWriter.class,
+                ParentArticleEntity.class, IParentArticleEntityRepositoryFixture.class,
+                ArticleType.class, Popularity.class
+        }
 )
 public class QuestionWriterTest {
 
-    private IParentArticleEntityRepository repository;
+    private IParentArticleEntityRepositoryFixture fixture;
     private DefaultQuestionWriter questionWriter;
 
     @BeforeEach
     void setup() {
-        repository = Mockito.mock(IParentArticleEntityRepository.class);
-        questionWriter = new DefaultQuestionWriter(repository);
+        fixture = new IParentArticleEntityRepositoryFixture();
+        questionWriter = new DefaultQuestionWriter(fixture);
     }
 
     @Test
-    void write_shouldPersistQuestionSuccessfully() {
-        Question question = new Question(null, "Title", "Content", 1L, null);
-        ParentArticleEntity entity = ParentArticleEntity.of(ArticleType.QUESTION, "Title", "Content", 1L, null, false);
-        ParentArticleEntity savedEntity = ParentArticleEntity.of(1L, ArticleType.QUESTION, "Title", "Content", 1L, null, false);
-
-        when(repository.save(any(ParentArticleEntity.class))).thenReturn(savedEntity);
-
+    void write_shouldSaveQuestion() {
+        Question question = Question.of(null, ArticleType.QUESTION, "Title", "Content", 1L, null, Popularity.empty(), false);
+        
         Question result = questionWriter.write(question);
 
-        assertNotNull(result);
+        assertNotNull(result.getId());
         assertEquals("Title", result.getTitle());
         assertEquals("Content", result.getContent());
-        verify(repository, times(1)).save(any(ParentArticleEntity.class));
+        assertEquals(ArticleType.QUESTION, result.getArticleType());
+        assertFalse(result.getDeleted());
     }
 
     @Test
@@ -60,21 +53,17 @@ public class QuestionWriterTest {
     }
 
     @Test
-    void update_shouldUpdateQuestionSuccessfully() {
-        Question question = new Question(1L, "Updated Title", "Updated Content", 1L, null);
-        ParentArticleEntity existingEntity = ParentArticleEntity.of(1L, ArticleType.QUESTION, "Old Title", "Old Content", 1L, null, false);
-        ParentArticleEntity updatedEntity = ParentArticleEntity.of(1L, ArticleType.QUESTION, "Updated Title", "Updated Content", 1L, null, false);
+    void update_shouldUpdateExistingQuestion() {
+        ParentArticleEntity existingEntity = fixture.save(ParentArticleEntity.of(
+                ArticleType.QUESTION, "Old Title", "Old Content", 1L, null, false));
 
-        when(repository.findById(1L)).thenReturn(Optional.of(existingEntity));
-        when(repository.save(any(ParentArticleEntity.class))).thenReturn(updatedEntity);
+        Question updatedQuestion = Question.of(existingEntity.getId(), ArticleType.QUESTION, "New Title", "New Content", 1L, null, Popularity.empty(), false);
 
-        Question result = questionWriter.update(question);
+        Question result = questionWriter.update(updatedQuestion);
 
-        assertNotNull(result);
-        assertEquals("Updated Title", result.getTitle());
-        assertEquals("Updated Content", result.getContent());
-        verify(repository, times(1)).findById(1L);
-        verify(repository, times(1)).save(any(ParentArticleEntity.class));
+        assertEquals(existingEntity.getId(), result.getId());
+        assertEquals("New Title", result.getTitle());
+        assertEquals("New Content", result.getContent());
     }
 
     @Test
@@ -84,30 +73,26 @@ public class QuestionWriterTest {
 
     @Test
     void update_shouldThrowExceptionWhenArticleIdIsNull() {
-        Question question = new Question(null, "Title", "Content", 1L, null);
+        Question question = Question.of(null, ArticleType.QUESTION, "Title", "Content", 1L, null, Popularity.empty(), false);
         assertThrows(IllegalArgumentException.class, () -> questionWriter.update(question));
     }
 
     @Test
     void update_shouldThrowExceptionWhenArticleNotFound() {
-        Question question = new Question(99L, "Title", "Content", 1L, null);
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
+        Question question = Question.of(999L, ArticleType.QUESTION, "Title", "Content", 1L, null, Popularity.empty(), false);
         assertThrows(RuntimeException.class, () -> questionWriter.update(question));
     }
 
     @Test
     void delete_shouldMarkArticleAsDeleted() {
-        ParentArticleEntity existingEntity = ParentArticleEntity.of(1L, ArticleType.QUESTION, "Title", "Content", 1L, null, false);
-        ParentArticleEntity deletedEntity = ParentArticleEntity.of(1L, ArticleType.QUESTION, "Title", "Content", 1L, null, true);
+        ParentArticleEntity existingEntity = fixture.save(ParentArticleEntity.of(
+                ArticleType.QUESTION, "Title", "Content", 1L, null, false));
 
-        when(repository.findById(1L)).thenReturn(Optional.of(existingEntity));
-        when(repository.save(any(ParentArticleEntity.class))).thenReturn(deletedEntity);
+        questionWriter.delete(existingEntity.getId());
 
-        questionWriter.delete(1L);
-
-        verify(repository, times(1)).findById(1L);
-        verify(repository, times(1)).save(any(ParentArticleEntity.class));
+        Optional<ParentArticleEntity> deletedEntityOpt = fixture.findById(existingEntity.getId());
+        assertTrue(deletedEntityOpt.isPresent());
+        assertTrue(deletedEntityOpt.get().getDeleted());
     }
 
     @Test
@@ -117,8 +102,6 @@ public class QuestionWriterTest {
 
     @Test
     void delete_shouldThrowExceptionWhenArticleNotFound() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(RuntimeException.class, () -> questionWriter.delete(99L));
+        assertThrows(RuntimeException.class, () -> questionWriter.delete(999L));
     }
 }

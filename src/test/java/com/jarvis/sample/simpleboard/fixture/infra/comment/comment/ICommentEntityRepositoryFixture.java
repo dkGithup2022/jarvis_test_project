@@ -1,4 +1,4 @@
-package com.jarvis.sample.simpleboard.fixture.comment.comment;
+package com.jarvis.sample.simpleboard.fixture.infra.comment.comment;
 
 import com.jarvis.sample.simpleboard.FakeSetter;
 import com.jarvis.sample.simpleboard.infra.comment.CommentEntity;

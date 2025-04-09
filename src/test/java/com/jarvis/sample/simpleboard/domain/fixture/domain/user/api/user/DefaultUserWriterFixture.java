@@ -1,27 +1,32 @@
-package com.jarvis.sample.simpleboard.domain.fixture.user.api.user;
+package com.jarvis.sample.simpleboard.domain.fixture.domain.user.api.user;
 
+import com.jarvis.sample.simpleboard.domain.user.api.user.DefaultUserWriter;
+import com.jarvis.sample.simpleboard.domain.user.api.user.PasswordEncoder;
+import com.jarvis.sample.simpleboard.domain.user.api.user.UserWriter;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.user.specs.User;
-import com.jarvis.sample.simpleboard.domain.user.specs.UserWriter;
-import com.jarvis.sample.simpleboard.domain.user.impl.DefaultUserWriter;
-import com.jarvis.sample.simpleboard.domain.user.repository.IUserEntityRepositoryFixture;
 
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_FIXTURE,
-    references = { User.class, DefaultUserWriter.class, UserWriter.class }
+        fileType = FileType.DOMAIN_API_FIXTURE,
+        references = {User.class, DefaultUserWriter.class, UserWriter.class}
 )
 public class DefaultUserWriterFixture implements UserWriter {
 
     private final UserWriter delegate;
 
     public DefaultUserWriterFixture() {
-        this.delegate = new DefaultUserWriter(new IUserEntityRepositoryFixture());
+
+        IUserEntityRepository repo = new IUserEntityRepositoryFixture();
+        PasswordEncoder passwordEncoder = new PasswordEncoder();
+        this.delegate = new DefaultUserWriter(repo, passwordEncoder);
     }
 
     @Override
-    public User createUser(User user) {
-        return delegate.createUser(user);
+    public User createUser(String nickname, String password) {
+        return delegate.createUser(nickname, password);
     }
 
     @Override

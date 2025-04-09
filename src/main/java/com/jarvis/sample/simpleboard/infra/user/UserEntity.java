@@ -45,15 +45,9 @@ public class UserEntity extends BaseEntity {
     }
 
     public static UserEntity of(String passwordEncoded, String nickname, Set<UserRole> userRole) {
-        return new UserEntity(passwordEncoded, nickname, userRole);
+        return new UserEntity(null, passwordEncoded, nickname, userRole);
     }
 
-    private UserEntity(String passwordEncoded, String nickname, Set<UserRole> userRole) {
-        this.id = null;
-        this.passwordEncoded = passwordEncoded;
-        this.nickname = nickname;
-        this.userRole = userRole;
-    }
 
     private UserEntity(Long id, String passwordEncoded, String nickname, Set<UserRole> userRole) {
         this.id = id;

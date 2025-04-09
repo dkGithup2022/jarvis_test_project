@@ -1,7 +1,6 @@
 package com.jarvis.sample.simpleboard.domain.article.specs;
 
 
-
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleBase;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
@@ -12,19 +11,29 @@ import lombok.Getter;
         fileType = FileType.DOMAIN_SPEC
 )
 @Getter
-public class Discussion   implements ArticleBase {
+public class Discussion implements ArticleBase {
 
     private static final int MAX_CONTENT_LENGTH = 10_000;
-    private final Long id;
-    private final Long authorId;
-    private final String authorNickname;
-    private final String title;
-    private final String content;
-    private final Popularity popularity;
-    private final boolean deleted;
+    private Long id;
+    private Long authorId;
+    private String authorNickname;
+    private String title;
+    private String content;
+    private Popularity popularity;
+    private boolean deleted;
 
     public static Discussion of(Long id, Long authorId, String authorNickname, String title, String content, Popularity popularity, boolean deleted) {
         return new Discussion(id, authorId, authorNickname, title, content, popularity, deleted);
+    }
+
+    @Override
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    @Override
+    public void updateContent(String content) {
+        this.content = content;
     }
 
     private Discussion(Long id, Long authorId, String authorNickname, String title, String content, Popularity popularity, boolean deleted) {

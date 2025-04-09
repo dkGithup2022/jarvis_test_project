@@ -1,11 +1,11 @@
-package com.jarvis.sample.simpleboard.domain.fixture.user.api.user;
+package com.jarvis.sample.simpleboard.domain.fixture.domain.user.api.user;
 
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.user.specs.User;
 import com.jarvis.sample.simpleboard.domain.user.api.user.UserReader;
 import com.jarvis.sample.simpleboard.domain.user.api.user.DefaultUserReader;
-import com.jarvis.sample.simpleboard.domain.fixture.user.api.user.IUserEntityRepositoryFixture;
 
 @JarvisMeta(
     fileType = FileType.DOMAIN_API_FIXTURE,

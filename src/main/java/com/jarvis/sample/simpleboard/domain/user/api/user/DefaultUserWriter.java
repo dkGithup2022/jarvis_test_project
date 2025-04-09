@@ -17,19 +17,21 @@ import java.util.Set;
 @RequiredArgsConstructor
 @JarvisMeta(
         fileType = FileType.DOMAIN_API_IMPL,
-        references = {User.class, UserWriter.class}
+        references = {User.class, UserWriter.class,
+                IUserEntityRepository.class, User.class, UserEntity.class, UserRole.class
+        }
 )
 public class DefaultUserWriter implements UserWriter {
 
     private final IUserEntityRepository userEntityRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User createUser(String nickname, String password ){
-        // check
-        if (user.getUserId() != null) {
-            throw new RuntimeException("User ID must be null for new users");
+    public User createUser(String nickname, String password) {
+        if (nickname == null || password == null) {
+            throw new RuntimeException("Nickname and password must not be null");
         }
-        UserEntity userEntity = UserEntity.of(null, nickname, Set.of(UserRole.USER));
+        UserEntity userEntity = UserEntity.of(passwordEncoder.encode(password), nickname, Set.of(UserRole.USER));
         UserEntity savedEntity = userEntityRepository.save(userEntity);
         return User.of(savedEntity.getId(), savedEntity.getNickname(), savedEntity.getUserRole());
     }
@@ -64,3 +66,7 @@ public class DefaultUserWriter implements UserWriter {
         return User.of(updatedEntity.getId(), updatedEntity.getNickname(), updatedEntity.getUserRole());
     }
 }
+
+// Note: The DefaultUserWriter class assumes the existence of a PasswordEncoder bean for encoding passwords. 
+// The deleteUserInfo method currently lacks a concrete implementation for marking a user as deleted; 
+// this would need to be implemented in the UserEntity class as indicated by the inline comment.

@@ -32,6 +32,16 @@ public class DiscussionReply   implements ArticleBase {
         return new DiscussionReply(id, authorId, authorNickname, title, content, popularity, parentId, order, deleted);
     }
 
+
+    @Override
+    public void updateTitle(String title) {
+        this.title =title;
+    }
+
+    @Override
+    public void updateContent(String content) {
+        this.content = content;
+    }
     private DiscussionReply(Long id, Long authorId, String authorNickname, String title, String content, Popularity popularity, Long parentId, Integer order, boolean deleted) {
         this.id = id;
         this.authorId = authorId;

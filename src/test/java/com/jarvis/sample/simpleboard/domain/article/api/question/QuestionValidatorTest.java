@@ -1,36 +1,34 @@
 package com.jarvis.sample.simpleboard.domain.article.api.question;
 
 import com.jarvis.sample.simpleboard.common.type.UserRole;
-import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
-import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
-import com.jarvis.sample.simpleboard.infra.user.UserEntity;
-import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.domain.article.specs.Question;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
+import com.jarvis.sample.simpleboard.fixture.infra.article.parentArticle.IParentArticleEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
 
 public class QuestionValidatorTest {
 
-    private IUserEntityRepository userEntityRepository;
-    private IParentArticleEntityRepository parentArticleEntityRepository;
+    private IUserEntityRepositoryFixture userEntityRepository;
+    private IParentArticleEntityRepositoryFixture parentArticleEntityRepository;
     private DefaultQuestionValidator questionValidator;
     private User user;
 
     @BeforeEach
     void setup() {
-        userEntityRepository = Mockito.mock(IUserEntityRepository.class);
-        parentArticleEntityRepository = Mockito.mock(IParentArticleEntityRepository.class);
+        userEntityRepository = new IUserEntityRepositoryFixture();
+        parentArticleEntityRepository = new IParentArticleEntityRepositoryFixture();
         questionValidator = new DefaultQuestionValidator(parentArticleEntityRepository, userEntityRepository);
-        user = new User(1L); // Simplified User class for testing
+        user = User.of(1L, "nickname", Set.of(UserRole.USER));
     }
 
     @Test
@@ -38,7 +36,7 @@ public class QuestionValidatorTest {
         Question newQuestion = Question.of(null, null, "title", "content", 1L, "nickname", null, false);
         UserEntity userEntity = UserEntity.of("password", "nickname", Set.of(UserRole.USER));
 
-        when(userEntityRepository.findById(user.getId())).thenReturn(Optional.of(userEntity));
+        userEntityRepository.save(userEntity);
 
         assertTrue(questionValidator.canWrite(newQuestion, user));
     }
@@ -56,8 +54,8 @@ public class QuestionValidatorTest {
         ParentArticleEntity articleEntity = ParentArticleEntity.of(1L, null, "title", "content", 1L, null, false);
         UserEntity userEntity = UserEntity.of("password", "nickname", Set.of(UserRole.USER));
 
-        when(userEntityRepository.findById(user.getId())).thenReturn(Optional.of(userEntity));
-        when(parentArticleEntityRepository.findById(question.getId())).thenReturn(Optional.of(articleEntity));
+        userEntityRepository.save(userEntity);
+        parentArticleEntityRepository.save(articleEntity);
 
         assertTrue(questionValidator.canUpdate(question, user));
     }
@@ -68,8 +66,8 @@ public class QuestionValidatorTest {
         ParentArticleEntity articleEntity = ParentArticleEntity.of(1L, null, "title", "content", 2L, null, false);
         UserEntity userEntity = UserEntity.of("password", "nickname", Set.of(UserRole.USER));
 
-        when(userEntityRepository.findById(user.getId())).thenReturn(Optional.of(userEntity));
-        when(parentArticleEntityRepository.findById(question.getId())).thenReturn(Optional.of(articleEntity));
+        userEntityRepository.save(userEntity);
+        parentArticleEntityRepository.save(articleEntity);
 
         assertFalse(questionValidator.canUpdate(question, user));
     }
@@ -80,8 +78,8 @@ public class QuestionValidatorTest {
         ParentArticleEntity articleEntity = ParentArticleEntity.of(1L, null, "title", "content", 1L, null, false);
         UserEntity userEntity = UserEntity.of("password", "nickname", Set.of(UserRole.USER));
 
-        when(userEntityRepository.findById(user.getId())).thenReturn(Optional.of(userEntity));
-        when(parentArticleEntityRepository.findById(question.getId())).thenReturn(Optional.of(articleEntity));
+        userEntityRepository.save(userEntity);
+        parentArticleEntityRepository.save(articleEntity);
 
         assertTrue(questionValidator.canDelete(question, user));
     }
@@ -92,8 +90,8 @@ public class QuestionValidatorTest {
         ParentArticleEntity articleEntity = ParentArticleEntity.of(1L, null, "title", "content", 2L, null, false);
         UserEntity userEntity = UserEntity.of("password", "nickname", Set.of(UserRole.USER));
 
-        when(userEntityRepository.findById(user.getId())).thenReturn(Optional.of(userEntity));
-        when(parentArticleEntityRepository.findById(question.getId())).thenReturn(Optional.of(articleEntity));
+        userEntityRepository.save(userEntity);
+        parentArticleEntityRepository.save(articleEntity);
 
         assertFalse(questionValidator.canDelete(question, user));
     }

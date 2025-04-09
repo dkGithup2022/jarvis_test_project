@@ -1,24 +1,42 @@
 package com.jarvis.sample.simpleboard.domain.article.api.answer;
 
+import com.jarvis.sample.simpleboard.FakeSetter;
+import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.common.type.UserRole;
+import com.jarvis.sample.simpleboard.common.vo.Popularity;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
+import com.jarvis.sample.simpleboard.fixture.infra.article.childArticle.IChildArticleEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.infra.article.ChildArticleEntity;
+import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
-import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 
 import com.jarvis.sample.simpleboard.domain.article.specs.Answer;
-import com.jarvis.sample.simpleboard.domain.article.specs.Popularity;
-import com.jarvis.sample.simpleboard.domain.user.User;
 
 public class AnswerValidatorTest {
 
     private IChildArticleEntityRepositoryFixture childArticleFixture;
     private IUserEntityRepositoryFixture userEntityFixture;
     private DefaultAnswerValidator answerValidator;
+
+    private UserEntity saveUser(IUserEntityRepositoryFixture fixture, Long id) {
+        UserEntity user = UserEntity.of("passwordEncoded", "nickname", Set.of(UserRole.USER));
+        FakeSetter.setField(user, "id", 1L);
+        return fixture.save(user);
+    }
+
+    private User getUserDomain(Long id) {
+        var entity = userEntityFixture.findById(id).get();
+        return User.of(entity.getId(), entity.getNickname(), entity.getUserRole());
+    }
 
     @BeforeEach
     void setup() {
@@ -29,10 +47,10 @@ public class AnswerValidatorTest {
 
     @Test
     void canWrite_whenUserAndAnswerValid_shouldReturnTrue() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(null, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(null, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
 
-        boolean result = answerValidator.canWrite(answer, user);
+        boolean result = answerValidator.canWrite(answer, getUserDomain(1L));
 
         assertTrue(result);
     }
@@ -48,31 +66,31 @@ public class AnswerValidatorTest {
 
     @Test
     void canWrite_whenAnswerIdNotNull_shouldReturnFalse() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(1L, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(1L, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
 
-        boolean result = answerValidator.canWrite(answer, user);
+        boolean result = answerValidator.canWrite(answer, getUserDomain(1L));
 
         assertFalse(result);
     }
 
     @Test
     void canUpdate_whenAnswerAndUserValid_shouldReturnTrue() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(1L, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(1L, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
         childArticleFixture.save(ChildArticleEntity.of(1L, user.getId(), ArticleType.ANSWER, "title", "content", new PopularityEmbeddable(0, 0, 0, 0), null, 1, false));
 
-        boolean result = answerValidator.canUpdate(answer, user);
+        boolean result = answerValidator.canUpdate(answer, getUserDomain(1L));
 
         assertTrue(result);
     }
 
     @Test
     void canUpdate_whenAnswerOrUserNull_shouldReturnFalse() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(1L, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(1L, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
 
-        boolean result = answerValidator.canUpdate(null, user);
+        boolean result = answerValidator.canUpdate(null, getUserDomain(1L));
 
         assertFalse(result);
 
@@ -83,31 +101,31 @@ public class AnswerValidatorTest {
 
     @Test
     void canUpdate_whenArticleOrUserDoesNotExist_shouldReturnFalse() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(1L, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(1L, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
 
-        boolean result = answerValidator.canUpdate(answer, user);
+        boolean result = answerValidator.canUpdate(answer, getUserDomain(1L));
 
         assertFalse(result);
     }
 
     @Test
     void canDelete_whenAnswerAndUserValid_shouldReturnTrue() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(1L, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(1L, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
         childArticleFixture.save(ChildArticleEntity.of(1L, user.getId(), ArticleType.ANSWER, "title", "content", new PopularityEmbeddable(0, 0, 0, 0), null, 1, false));
 
-        boolean result = answerValidator.canDelete(answer, user);
+        boolean result = answerValidator.canDelete(answer, getUserDomain(1L));
 
         assertTrue(result);
     }
 
     @Test
     void canDelete_whenAnswerOrUserNull_shouldReturnFalse() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(1L, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(1L, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
 
-        boolean result = answerValidator.canDelete(null, user);
+        boolean result = answerValidator.canDelete(null, getUserDomain(1L));
 
         assertFalse(result);
 
@@ -118,10 +136,10 @@ public class AnswerValidatorTest {
 
     @Test
     void canDelete_whenArticleOrUserDoesNotExist_shouldReturnFalse() {
-        User user = new User(1L, "testUser", "ROLE_USER");
-        Answer answer = Answer.of(1L, user.getId(), user.getUsername(), "title", "content", Popularity.empty(), null, 1, false);
+        var user = saveUser(userEntityFixture, 1L);
+        Answer answer = Answer.of(1L, user.getId(), user.getNickname(), "title", "content", Popularity.empty(), null, 1, false);
 
-        boolean result = answerValidator.canDelete(answer, user);
+        boolean result = answerValidator.canDelete(answer, getUserDomain(1L));
 
         assertFalse(result);
     }

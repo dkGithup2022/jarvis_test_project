@@ -12,6 +12,8 @@ import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
@@ -27,6 +29,7 @@ import java.util.Optional;
                 ArticleType.class
         }
 )
+@Component
 public class DefaultDiscussionReplyValidator implements DiscussionReplyValidator {
 
     private final IChildArticleEntityRepository childArticleEntityRepository;

@@ -32,6 +32,16 @@ public class Answer implements ArticleBase {
         return new Answer(id, authorId, authorNickname, title, content, popularity, parentId, order, deleted);
     }
 
+    @Override
+    public void updateTitle(String title) {
+        this.title =title;
+    }
+
+    @Override
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
     private Answer(Long id, Long authorId, String authorNickname, String title, String content, Popularity popularity, Long parentId, Integer order, boolean deleted) {
         this.id = id;
         this.authorId = authorId;

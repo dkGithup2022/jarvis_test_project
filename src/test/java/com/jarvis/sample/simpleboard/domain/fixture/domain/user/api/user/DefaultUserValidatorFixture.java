@@ -1,12 +1,11 @@
-package com.jarvis.sample.simpleboard.domain.fixture.user.api.user;
 
+import com.jarvis.sample.simpleboard.domain.user.api.user.DefaultUserValidator;
+import com.jarvis.sample.simpleboard.domain.user.api.user.UserValidator;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 
 import com.jarvis.sample.simpleboard.domain.user.specs.User;
-import com.jarvis.sample.simpleboard.domain.user.specs.UserValidator;
-import com.jarvis.sample.simpleboard.domain.user.impl.DefaultUserValidator;
-import com.jarvis.sample.simpleboard.domain.fixture.user.repository.IUserEntityRepositoryFixture;
 
 @JarvisMeta(
     fileType = FileType.DOMAIN_API_FIXTURE,

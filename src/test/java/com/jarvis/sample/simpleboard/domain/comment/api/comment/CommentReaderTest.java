@@ -1,6 +1,7 @@
 package com.jarvis.sample.simpleboard.domain.comment.api.comment;
 
 import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.fixture.infra.comment.comment.ICommentEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.infra.comment.CommentEntity;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
@@ -20,12 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 )
 public class CommentReaderTest {
 
-    private com.jarvis.sample.simpleboard.fixture.comment.comment.ICommentEntityRepositoryFixture fixture;
+    private ICommentEntityRepositoryFixture fixture;
     private DefaultCommentReader commentReader;
 
     @BeforeEach
     void setup() {
-        fixture = new com.jarvis.sample.simpleboard.fixture.comment.comment.ICommentEntityRepositoryFixture();
+        fixture = new ICommentEntityRepositoryFixture();
         commentReader = new DefaultCommentReader(fixture);
     }
 

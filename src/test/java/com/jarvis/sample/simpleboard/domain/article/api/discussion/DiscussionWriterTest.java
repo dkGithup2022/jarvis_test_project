@@ -5,10 +5,16 @@ import com.jarvis.sample.simpleboard.common.type.UserRole;
 import com.jarvis.sample.simpleboard.common.vo.Popularity;
 import com.jarvis.sample.simpleboard.domain.article.ArticleWriterBase;
 import com.jarvis.sample.simpleboard.domain.article.specs.Discussion;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
+import com.jarvis.sample.simpleboard.fixture.infra.article.parentArticle.IParentArticleEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
 import com.jarvis.sample.simpleboard.infra.article.ParentArticleEntity;
+import com.jarvis.sample.simpleboard.infra.article.PopularityEmbeddable;
 import com.jarvis.sample.simpleboard.infra.article.api.IParentArticleEntityRepository;
 import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.infra.user.api.IUserEntityRepository;
+import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
+import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,112 +22,107 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
+@JarvisMeta(
+        fileType = FileType.DOMAIN_API_TEST,
+        references = {
+                Discussion.class, DefaultDiscussionWriter.class, DiscussionWriter.class,
+                ArticleWriterBase.class,
+
+                UserEntity.class, IUserEntityRepositoryFixture.class,
+                ParentArticleEntity.class, IParentArticleEntityRepositoryFixture.class,
+
+                User.class, PopularityEmbeddable.class,
+                UserRole.class,
+                ArticleType.class, Popularity.class
+        }
+)
 public class DiscussionWriterTest {
 
-    private IParentArticleEntityRepository parentArticleEntityRepository;
-    private IUserEntityRepository userEntityRepository;
+    private IParentArticleEntityRepositoryFixture parentArticleFixture;
+    private IUserEntityRepositoryFixture userEntityFixture;
     private DefaultDiscussionWriter discussionWriter;
 
     @BeforeEach
     void setup() {
-        parentArticleEntityRepository = mock(IParentArticleEntityRepository.class);
-        userEntityRepository = mock(IUserEntityRepository.class);
-        discussionWriter = new DefaultDiscussionWriter(parentArticleEntityRepository, userEntityRepository);
+        parentArticleFixture = new IParentArticleEntityRepositoryFixture();
+        userEntityFixture = new IUserEntityRepositoryFixture();
+        discussionWriter = new DefaultDiscussionWriter(parentArticleFixture, userEntityFixture);
     }
 
     @Test
-    void write_shouldSaveNewDiscussion() {
-        UserEntity author = UserEntity.of("encodedPassword", "authorNickname", Set.of(UserRole.USER));
-        Discussion article = Discussion.of(null, 1L, "authorNickname", "Test Title", "Test Content", Popularity.empty(), false);
+    void write_shouldCreateNewDiscussion() {
+        UserEntity author = UserEntity.of("password123", "authorNickname", Set.of(UserRole.USER));
+        userEntityFixture.save(author);
 
-        when(userEntityRepository.findById(1L)).thenReturn(Optional.of(author));
-        when(parentArticleEntityRepository.save(any(ParentArticleEntity.class)))
-                .thenAnswer(invocation -> {
-                    ParentArticleEntity entity = invocation.getArgument(0);
-                    return ParentArticleEntity.of(1L, entity.getArticleType(), entity.getTitle(), entity.getContent(),
-                            entity.getAuthorId(), entity.getPopularityEmbeddable(), entity.getDeleted());
-                });
+        Discussion article = Discussion.of(null, author.getId(), "authorNickname", "Title", "Content", Popularity.empty(), false);
+        Discussion result = discussionWriter.write(article);
 
-        Discussion savedDiscussion = discussionWriter.write(article);
-
-        assertNotNull(savedDiscussion);
-        assertEquals("Test Title", savedDiscussion.title());
-        assertEquals("Test Content", savedDiscussion.content());
-        assertEquals("authorNickname", savedDiscussion.authorNickname());
-        verify(parentArticleEntityRepository, times(1)).save(any(ParentArticleEntity.class));
+        assertNotNull(result.getId());
+        assertEquals("Title", result.getTitle());
+        assertEquals("Content", result.getContent());
+        assertEquals(author.getId(), result.getAuthorId());
     }
 
     @Test
-    void write_shouldThrowExceptionIfArticleIdIsNotNull() {
-        Discussion article = Discussion.of(1L, 1L, "authorNickname", "Test Title", "Test Content", Popularity.empty(), false);
+    void write_shouldFailIfArticleIdIsNotNull() {
+        Discussion article = Discussion.of(1L, 1L, "authorNickname", "Title", "Content", Popularity.empty(), false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> discussionWriter.write(article));
-
         assertEquals("Article ID must be null for a new article", exception.getMessage());
     }
 
     @Test
-    void write_shouldThrowExceptionIfAuthorNotFound() {
-        Discussion article = Discussion.of(null, 1L, "authorNickname", "Test Title", "Test Content", Popularity.empty(), false);
-
-        when(userEntityRepository.findById(1L)).thenReturn(Optional.empty());
+    void write_shouldFailIfAuthorNotFound() {
+        Discussion article = Discussion.of(null, 999L, "authorNickname", "Title", "Content", Popularity.empty(), false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> discussionWriter.write(article));
-
         assertEquals("Author not found", exception.getMessage());
     }
 
     @Test
     void update_shouldUpdateExistingDiscussion() {
-        ParentArticleEntity existingEntity = ParentArticleEntity.of(1L, ArticleType.DISCUSSION, "Old Title", "Old Content", 1L, null, false);
-        UserEntity author = UserEntity.of("encodedPassword", "authorNickname", Set.of(UserRole.USER));
-        Discussion article = Discussion.of(1L, 1L, "authorNickname", "Updated Title", "Updated Content", Popularity.empty(), false);
+        UserEntity author = UserEntity.of("password123", "authorNickname", Set.of(UserRole.USER));
+        userEntityFixture.save(author);
 
-        when(parentArticleEntityRepository.findById(1L)).thenReturn(Optional.of(existingEntity));
-        when(userEntityRepository.findById(1L)).thenReturn(Optional.of(author));
-        when(parentArticleEntityRepository.save(any(ParentArticleEntity.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        ParentArticleEntity entity = ParentArticleEntity.of(ArticleType.DISCUSSION, "Old Title", "Old Content", author.getId(), new PopularityEmbeddable(0, 0, 0, 0), false);
+        parentArticleFixture.save(entity);
 
-        Discussion updatedDiscussion = discussionWriter.update(article);
+        Discussion article = Discussion.of(entity.getId(), author.getId(), "authorNickname", "New Title", "New Content", Popularity.empty(), false);
+        Discussion result = discussionWriter.update(article);
 
-        assertNotNull(updatedDiscussion);
-        assertEquals("Updated Title", updatedDiscussion.title());
-        assertEquals("Updated Content", updatedDiscussion.content());
-        verify(parentArticleEntityRepository, times(1)).save(any(ParentArticleEntity.class));
+        assertEquals(entity.getId(), result.getId());
+        assertEquals("New Title", result.getTitle());
+        assertEquals("New Content", result.getContent());
     }
 
     @Test
-    void update_shouldThrowExceptionIfArticleNotFound() {
-        Discussion article = Discussion.of(1L, 1L, "authorNickname", "Updated Title", "Updated Content", Popularity.empty(), false);
-
-        when(parentArticleEntityRepository.findById(1L)).thenReturn(Optional.empty());
+    void update_shouldFailIfArticleNotFound() {
+        Discussion article = Discussion.of(999L, 1L, "authorNickname", "Title", "Content", Popularity.empty(), false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> discussionWriter.update(article));
-
         assertEquals("Article not found", exception.getMessage());
     }
 
     @Test
-    void delete_shouldSetDeletedFlag() {
-        ParentArticleEntity existingEntity = ParentArticleEntity.of(1L, ArticleType.DISCUSSION, "Title", "Content", 1L, null, false);
+    void delete_shouldMarkDiscussionAsDeleted() {
+        UserEntity author = UserEntity.of("password123", "authorNickname", Set.of(UserRole.USER));
+        userEntityFixture.save(author);
 
-        when(parentArticleEntityRepository.findById(1L)).thenReturn(Optional.of(existingEntity));
-        when(parentArticleEntityRepository.save(any(ParentArticleEntity.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        ParentArticleEntity entity = ParentArticleEntity.of(ArticleType.DISCUSSION, "Title", "Content", author.getId(), new PopularityEmbeddable(0, 0, 0, 0), false);
+        parentArticleFixture.save(entity);
 
-        discussionWriter.delete(1L);
+        discussionWriter.delete(entity.getId());
 
-        verify(parentArticleEntityRepository, times(1)).save(argThat(entity -> entity.getDeleted()));
+        ParentArticleEntity updatedEntity = parentArticleFixture.findById(entity.getId()).orElseThrow();
+        assertTrue(updatedEntity.getDeleted());
     }
 
     @Test
-    void delete_shouldThrowExceptionIfArticleNotFound() {
-        when(parentArticleEntityRepository.findById(1L)).thenReturn(Optional.empty());
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> discussionWriter.delete(1L));
-
+    void delete_shouldFailIfArticleNotFound() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> discussionWriter.delete(999L));
         assertEquals("Article not found", exception.getMessage());
     }
 }
+
+// Note: FakeSetter is assumed to be a utility class that allows setting private fields for testing purposes.

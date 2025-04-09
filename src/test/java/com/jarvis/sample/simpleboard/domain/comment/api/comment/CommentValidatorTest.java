@@ -1,32 +1,39 @@
 package com.jarvis.sample.simpleboard.domain.comment.api.comment;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.jarvis.sample.simpleboard.common.type.ArticleType;
+import com.jarvis.sample.simpleboard.common.type.UserRole;
+import com.jarvis.sample.simpleboard.domain.comment.specs.Comment;
+import com.jarvis.sample.simpleboard.domain.user.specs.User;
+import com.jarvis.sample.simpleboard.fixture.infra.comment.comment.ICommentEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.fixture.infra.user.user.IUserEntityRepositoryFixture;
+import com.jarvis.sample.simpleboard.infra.comment.CommentEntity;
+import com.jarvis.sample.simpleboard.infra.user.UserEntity;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import com.jarvis.sample.simpleboard.domain.comment.specs.Comment;
-import com.jarvis.sample.simpleboard.domain.comment.impl.DefaultCommentValidator;
-import com.jarvis.sample.simpleboard.domain.comment.specs.CommentValidator;
-import com.jarvis.sample.simpleboard.domain.user.User;
-import com.jarvis.sample.simpleboard.domain.user.UserRole;
+import java.util.Set;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
 
 @JarvisMeta(
-    fileType = FileType.DOMAIN_API_TEST,
-    references = { Comment.class, DefaultCommentValidator.class, CommentValidator.class }
+        fileType = FileType.DOMAIN_API_TEST,
+        references = {Comment.class, DefaultCommentValidator.class, CommentValidator.class,
+                ICommentEntityRepositoryFixture.class,
+                CommentEntity.class,
+                ArticleType.class,
+                UserEntity.class,
+                User.class,
+                UserRole.class
+        }
 )
 public class CommentValidatorTest {
 
     private ICommentEntityRepositoryFixture commentFixture;
     private IUserEntityRepositoryFixture userFixture;
     private DefaultCommentValidator commentValidator;
-    
+
     @BeforeEach
     void setup() {
         commentFixture = new ICommentEntityRepositoryFixture();
@@ -35,80 +42,107 @@ public class CommentValidatorTest {
     }
 
     @Test
-    void canWrite_shouldReturnFalseIfUserIsNull() {
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        assertFalse(commentValidator.canWrite(null, comment));
+    void canWrite_shouldReturnTrue_whenUserHasValidRoleAndExistsInDb() {
+        User user = User.of(1L, "validUser", Set.of(UserRole.USER));
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        UserEntity userEntity = UserEntity.of("password", "validUser", Set.of(UserRole.USER));
+        userFixture.save(userEntity);
+
+        Boolean result = commentValidator.canWrite(user, comment);
+
+        assertTrue(result);
     }
 
     @Test
-    void canWrite_shouldReturnFalseIfUserRoleIsInvalid() {
-        User user = new User(1L, List.of(UserRole.GUEST)); // Assuming UserRole.GUEST is an invalid role
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        userFixture.save(user);
-        assertFalse(commentValidator.canWrite(user, comment));
+    void canWrite_shouldReturnFalse_whenUserIsNull() {
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        Boolean result = commentValidator.canWrite(null, comment);
+
+        assertFalse(result);
     }
 
     @Test
-    void canWrite_shouldReturnFalseIfUserDoesNotExist() {
-        User user = new User(1L, List.of(UserRole.USER));
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        assertFalse(commentValidator.canWrite(user, comment));
+    void canWrite_shouldReturnFalse_whenUserRoleIsInvalid() {
+        User user = User.of(1L, "invalidUser", Set.of());
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        UserEntity userEntity = UserEntity.of("password", "invalidUser", Set.of());
+        userFixture.save(userEntity);
+
+        Boolean result = commentValidator.canWrite(user, comment);
+
+        assertFalse(result);
     }
 
     @Test
-    void canWrite_shouldReturnTrueIfUserHasValidRoleAndExists() {
-        User user = new User(1L, List.of(UserRole.USER));
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        userFixture.save(user);
-        assertTrue(commentValidator.canWrite(user, comment));
+    void canWrite_shouldReturnFalse_whenUserDoesNotExistInDb() {
+        User user = User.of(1L, "nonExistentUser", Set.of(UserRole.USER));
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        Boolean result = commentValidator.canWrite(user, comment);
+
+        assertFalse(result);
     }
 
     @Test
-    void canUpdate_shouldReturnFalseIfUserIsNull() {
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        assertFalse(commentValidator.canUpdate(null, comment));
+    void canUpdate_shouldReturnTrue_whenUserOwnsCommentAndBothExistInDb() {
+        User user = User.of(1L, "validUser", Set.of(UserRole.USER));
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        UserEntity userEntity = UserEntity.of("password", "validUser", Set.of(UserRole.USER));
+        CommentEntity commentEntity = CommentEntity.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        userFixture.save(userEntity);
+        commentFixture.save(commentEntity);
+
+        Boolean result = commentValidator.canUpdate(user, comment);
+
+        assertTrue(result);
     }
 
     @Test
-    void canUpdate_shouldReturnFalseIfCommentIsNull() {
-        User user = new User(1L, List.of(UserRole.USER));
-        userFixture.save(user);
-        assertFalse(commentValidator.canUpdate(user, null));
+    void canUpdate_shouldReturnFalse_whenUserIsNull() {
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        Boolean result = commentValidator.canUpdate(null, comment);
+
+        assertFalse(result);
     }
 
     @Test
-    void canUpdate_shouldReturnFalseIfUserAndCommentIdsDoNotMatch() {
-        User user = new User(1L, List.of(UserRole.USER));
-        Comment comment = Comment.of(2L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        userFixture.save(user);
-        commentFixture.save(comment);
-        assertFalse(commentValidator.canUpdate(user, comment));
+    void canUpdate_shouldReturnFalse_whenCommentIsNull() {
+        User user = User.of(1L, "validUser", Set.of(UserRole.USER));
+
+        Boolean result = commentValidator.canUpdate(user, null);
+
+        assertFalse(result);
     }
 
     @Test
-    void canUpdate_shouldReturnFalseIfUserDoesNotExist() {
-        User user = new User(1L, List.of(UserRole.USER));
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        commentFixture.save(comment);
-        assertFalse(commentValidator.canUpdate(user, comment));
+    void canUpdate_shouldReturnFalse_whenUserAndCommentDoNotExistInDb() {
+        User user = User.of(1L, "nonExistentUser", Set.of(UserRole.USER));
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        Boolean result = commentValidator.canUpdate(user, comment);
+
+        assertFalse(result);
     }
 
     @Test
-    void canUpdate_shouldReturnFalseIfCommentDoesNotExist() {
-        User user = new User(1L, List.of(UserRole.USER));
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        userFixture.save(user);
-        assertFalse(commentValidator.canUpdate(user, comment));
-    }
+    void canUpdate_shouldReturnFalse_whenUserIdDoesNotMatchCommentOwnerId() {
+        User user = User.of(2L, "validUser", Set.of(UserRole.USER));
+        Comment comment = Comment.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
 
-    @Test
-    void canUpdate_shouldReturnTrueIfUserAndCommentExistAndIdsMatch() {
-        User user = new User(1L, List.of(UserRole.USER));
-        Comment comment = Comment.of(1L, ArticleType.NORMAL, 1L, "This is a comment", null, 1, 1, 0, false);
-        userFixture.save(user);
-        commentFixture.save(comment);
-        assertTrue(commentValidator.canUpdate(user, comment));
+        UserEntity userEntity = UserEntity.of("password", "validUser", Set.of(UserRole.USER));
+        CommentEntity commentEntity = CommentEntity.of(1L, ArticleType.ARTICLE, 1L, "Valid content", null, 1, 1, 0, false);
+
+        userFixture.save(userEntity);
+        commentFixture.save(commentEntity);
+
+        Boolean result = commentValidator.canUpdate(user, comment);
+
+        assertFalse(result);
     }
 }
-
-// Note: The User class and UserRole enum are assumed to be available in the codebase and used for user-related operations.

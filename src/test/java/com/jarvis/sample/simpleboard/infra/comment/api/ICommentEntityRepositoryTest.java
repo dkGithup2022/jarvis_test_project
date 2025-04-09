@@ -31,7 +31,7 @@ public class ICommentEntityRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        commentEntity = CommentEntity.of(null, ArticleType.NORMAL, 1L, "Sample Comment", null, 1, null, 0, false);
+        commentEntity = CommentEntity.of(null, ArticleType.ARTICLE, 1L, "Sample Comment", null, 1, null, 0, false);
         repository.save(commentEntity);
     }
 
@@ -77,7 +77,7 @@ public class ICommentEntityRepositoryTest {
 
     @Test
     void findTopByParentIdOrderByCommentSeqDesc_shouldReturnTopCommentWhenExists() {
-        CommentEntity replyComment = CommentEntity.of(null, ArticleType.NORMAL, 1L, "Reply Comment", commentEntity.getId(), 1, 1, 0, false);
+        CommentEntity replyComment = CommentEntity.of(null, ArticleType.ARTICLE, 1L, "Reply Comment", commentEntity.getId(), 1, 1, 0, false);
         repository.save(replyComment);
 
         Optional<CommentEntity> topReply = repository.findTopByParentIdOrderByCommentSeqDesc(commentEntity.getId());
@@ -94,7 +94,7 @@ public class ICommentEntityRepositoryTest {
     @Test
     void listByArticleId_shouldReturnCommentsForArticle() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        List<CommentEntity> comments = repository.listByArticleId(ArticleType.NORMAL, 1L, pageRequest);
+        List<CommentEntity> comments = repository.listByArticleId(ArticleType.ARTICLE, 1L, pageRequest);
         assertFalse(comments.isEmpty());
         assertEquals(commentEntity.getContent(), comments.get(0).getContent());
     }
@@ -102,7 +102,7 @@ public class ICommentEntityRepositoryTest {
     @Test
     void listByArticleId_shouldReturnEmptyListForNonExistingArticle() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        List<CommentEntity> comments = repository.listByArticleId(ArticleType.NORMAL, 999L, pageRequest);
+        List<CommentEntity> comments = repository.listByArticleId(ArticleType.ARTICLE, 999L, pageRequest);
         assertTrue(comments.isEmpty());
     }
 }
