@@ -14,7 +14,7 @@
 
 ## 데모영상 
 
-![시연](./demo_demo-ezgif.com-video-to-gif-converter.gif)
+![시연](./demo_demo.gif)
 
 ![고화질 링크](https://github.com/dkGithup2022/jarvis_test_project/issues/2)
 ****
