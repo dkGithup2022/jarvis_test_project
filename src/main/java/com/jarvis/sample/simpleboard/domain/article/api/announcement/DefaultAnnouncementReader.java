@@ -24,7 +24,8 @@ import java.util.Optional;
                 ArticleReaderBase.class,
                 UserEntity.class, IUserEntityRepository.class,
                 ArticleEntity.class, IArticleEntityRepository.class,
-                ArticleType.class, Popularity.class}
+                ArticleType.class, Popularity.class,
+                PopularityMapper.class}
 )
 public class DefaultAnnouncementReader implements AnnouncementReader {
 
@@ -34,6 +35,7 @@ public class DefaultAnnouncementReader implements AnnouncementReader {
     @Override
     public Announcement read(Long articleId) {
         Optional<ArticleEntity> articleEntityOpt = articleEntityRepository.findById(articleId);
+        
         if (articleEntityOpt.isEmpty()) {
             throw new IllegalArgumentException("Article not found for id: " + articleId);
         }
@@ -45,18 +47,22 @@ public class DefaultAnnouncementReader implements AnnouncementReader {
         }
 
         Optional<UserEntity> userEntityOpt = userEntityRepository.findById(articleEntity.getAuthorId());
+        
         if (userEntityOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found for id: " + articleEntity.getAuthorId());
         }
 
         UserEntity userEntity = userEntityOpt.get();
+
+        Popularity popularity = PopularityMapper.toRead(articleEntity.getPopularityEmbeddable());
+
         return Announcement.of(
                 articleEntity.getId(),
                 articleEntity.getAuthorId(),
                 userEntity.getNickname(),
                 articleEntity.getTitle(),
                 articleEntity.getContent(),
-                PopularityMapper.toRead(articleEntity.getPopularityEmbeddable()),
+                popularity,
                 articleEntity.getDeleted()
         );
     }
