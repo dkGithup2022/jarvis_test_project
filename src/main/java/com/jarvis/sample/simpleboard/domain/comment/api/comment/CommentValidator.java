@@ -25,4 +25,6 @@ public interface CommentValidator {
     * db dp user, comment 가 둘 다 존재 해야함.
     * */
     Boolean canUpdate(User user, Comment comment);
+
+
 }

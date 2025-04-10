@@ -28,5 +28,10 @@ public class DefaultCommentReaderFixture implements CommentReader {
         return delegate.listByArticleInfo(articleType, articleId, page, pageSize)
                 ;
     }
+
+    @Override
+    public Comment findById(Long id) {
+        return delegate.findById(id);
+    }
     // TODO: 필요 시 테스트용 목 동작 구현
 }

@@ -1,5 +1,6 @@
 package com.jarvis.sample.simpleboard.domain.comment.api.comment;
 
+import com.jarvis.sample.simpleboard.common.type.ArticleType;
 import com.jarvis.sample.simpleboard.infra.comment.CommentEntity;
 import com.jarvis.sample.simpleboard.infra.comment.api.ICommentEntityRepository;
 import com.jarvis.sample.simpleboard.jarvisAnnotation.FileType;
@@ -14,7 +15,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @JarvisMeta(
     fileType = FileType.DOMAIN_API_IMPL,
-    references = { Comment.class, CommentWriter.class }
+    references = {
+            Comment.class,
+            CommentWriter.class ,
+            ICommentEntityRepository.class,
+            CommentEntity.class,
+            ArticleType.class
+    }
+
 )
 public class DefaultCommentWriter implements CommentWriter {
 

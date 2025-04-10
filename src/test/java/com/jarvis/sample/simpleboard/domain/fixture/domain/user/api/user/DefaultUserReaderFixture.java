@@ -23,6 +23,11 @@ public class DefaultUserReaderFixture implements UserReader {
     public User findById(Long userId) {
         return delegate.findById(userId);
     }
+
+    @Override
+    public User findByNickname(String nickname) {
+        return null;
+    }
 }
 
 // Context

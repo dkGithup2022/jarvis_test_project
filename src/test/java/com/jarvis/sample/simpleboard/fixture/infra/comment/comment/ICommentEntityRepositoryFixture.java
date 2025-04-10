@@ -22,7 +22,11 @@ import java.util.stream.Collectors;
 
 @JarvisMeta(
     fileType = FileType.INFRA_REPOSITORY_FIXTURE,
-    references = { CommentEntity.class, ICommentEntityRepository.class }
+    references = {
+            CommentEntity.class, ICommentEntityRepository.class
+
+
+    }
 )
 public class ICommentEntityRepositoryFixture implements ICommentEntityRepository {
     private final HashMap<Long, CommentEntity> db = new HashMap<>();

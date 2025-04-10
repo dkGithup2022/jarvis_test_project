@@ -7,6 +7,8 @@ import com.jarvis.sample.simpleboard.jarvisAnnotation.JarvisMeta;
 import com.jarvis.sample.simpleboard.domain.user.specs.User;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.util.Optional;
 
 @JarvisMeta(
@@ -14,6 +16,7 @@ import java.util.Optional;
     references = { User.class, UserValidator.class }
 )
 @RequiredArgsConstructor
+@Component
 public class DefaultUserValidator implements UserValidator {
 
     private final IUserEntityRepository userEntityRepository;

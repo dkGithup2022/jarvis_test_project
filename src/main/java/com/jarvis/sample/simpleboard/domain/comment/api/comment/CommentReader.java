@@ -13,4 +13,10 @@ import java.util.List;
 )
 public interface CommentReader {
     List<Comment> listByArticleInfo(ArticleType articleType, Long articleId, int page, int pageSize);
+
+    /*
+    * comment 의 id 로 조회,
+    * 조회 결과가 없다면 null 을 출력하시오.
+    * */
+    Comment findById(Long id);
 }

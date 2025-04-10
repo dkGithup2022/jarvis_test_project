@@ -6,6 +6,7 @@ import com.jarvis.sample.simpleboard.domain.comment.api.comment.CommentValidator
 import com.jarvis.sample.simpleboard.domain.comment.api.comment.CommentWriter;
 import com.jarvis.sample.simpleboard.domain.comment.specs.Comment;
 import com.jarvis.sample.simpleboard.domain.user.api.user.UserReader;
+import com.jarvis.sample.simpleboard.infra.comment.api.ICommentEntityRepository;
 import com.jarvis.sample.simpleboard.web.SessionHolder;
 import com.jarvis.sample.simpleboard.web.article.dto.ArticleWriteRequest;
 import com.jarvis.sample.simpleboard.web.comment.dto.CommentWriteRequest;
@@ -26,6 +27,7 @@ public class CommentController {
     private final SessionHolder sessionHolder;
     private final UserReader userReader;
 
+
     private final CommentReader commentReader;
     private final CommentWriter commentWriter;
     private final CommentValidator commentValidator;
@@ -45,9 +47,17 @@ public class CommentController {
 
     }
 
-    public ResponseEntity<SuccessApiResponse> delete(CommentDeleteRequest request) {
-
+    @PostMapping("/delete")
+    public ResponseEntity<SuccessApiResponse<String>> delete(CommentDeleteRequest request) {
+        var user = userReader.findById(sessionHolder.requestUserId());
+        var comment = commentReader.findById(request.id());
         // comment 에 대한 단건 조회 api 구현 필요 - 스킵
+        if (!commentValidator.canUpdate(user, comment))
+            throw new RuntimeException("못지우는 댓글");
+
+        var deleted = comment.markDeleted();
+        commentWriter.update(deleted);
+
         return null;
     }
 

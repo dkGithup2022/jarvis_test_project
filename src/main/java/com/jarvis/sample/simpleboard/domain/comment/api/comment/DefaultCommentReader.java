@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -46,6 +47,12 @@ public class DefaultCommentReader implements CommentReader {
                 .toList();
     }
 
+    @Override
+    public Comment findById(Long id) {
+        Optional<CommentEntity> optionalEntity = commentEntityRepository.findById(id);
+        return optionalEntity.map(this::convertToDomain).orElse(null);
+    }
+
     private Comment convertToDomain(CommentEntity entity) {
         return Comment.of(
                 entity.getId(),
@@ -64,8 +71,8 @@ public class DefaultCommentReader implements CommentReader {
 /*
 Inline Comments:
 
-1. The `DefaultCommentReader` class implements the `CommentReader` interface and provides the implementation for the `listByArticleInfo` method.
-2. The `listByArticleInfo` method uses `PageRequest` to handle pagination and retrieves a list of `CommentEntity` objects from the repository.
-3. The `convertToDomain` method maps a `CommentEntity` object to a `Comment` domain object.
-4. The `ICommentEntityRepository` is assumed to have a method `findByArticleTypeAndArticleId` for fetching comments by article type and ID with pagination.
+1. The `DefaultCommentReader` class implements the `CommentReader` interface, providing implementations for both `listByArticleInfo` and `findById` methods.
+2. The `findById` method retrieves a `CommentEntity` by its ID from the repository and converts it to a `Comment` domain object.
+3. The method returns `null` if the comment is not found.
+4. The `convertToDomain` method is a helper that maps a `CommentEntity` object to a `Comment` domain object.
 */
