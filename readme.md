@@ -14,8 +14,8 @@
 
 ## 데모영상 
 
-![시연 GIF](/간단한거_만들기.gif)
-
+![시연 GIF](https://github.com/dkGithup2022/jarvis_test_project/issues/2)
+****
 
 
 ## 소개 
